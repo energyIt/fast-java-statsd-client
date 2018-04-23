@@ -1,9 +1,7 @@
 package com.energyit.statsd;
 
 import java.io.Closeable;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
@@ -12,17 +10,19 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class FastStatsDClient implements StatsDClient, Closeable {
 
 
-    private Buffer msgBuffer = ByteBuffer.allocateDirect(1024);
-    private final byte[] prefix;
-    private final Tag[] constantTagsRendered;
+    private static final double NO_SAMPLE_RATE = 1.0;
+    private static ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(256));
 
-    public FastStatsDClient(final String prefix, Tag[] constantTags) {
+    private final byte[] prefix;
+    private final Sender sender;
+
+    public FastStatsDClient(final String prefix, Sender sender) {
         if ((prefix != null) && (!prefix.isEmpty())) {
             this.prefix = (prefix + '.').getBytes();
         } else {
             this.prefix = new byte[0];
         }
-        constantTagsRendered = constantTags;
+        this.sender = sender;
 
     }
 
@@ -39,39 +39,53 @@ public final class FastStatsDClient implements StatsDClient, Closeable {
      * {@inheritDoc}
      */
     @Override
+    public void count(final byte[] aspect, final long delta, final Tag... tags) {
+        send(aspect, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void count(final byte[] aspect, final long delta, final double sampleRate, final Tag... tags) {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(String.format("%s%s:%d|c|@%f%s", prefix, aspect, delta, sampleRate, tagString(tags)));
+        send(aspect, delta, MetricType.COUNTER, sampleRate, tags);
     }
 
-    private void formatMessage(
-            final ByteBuffer buffer, final byte[] metric, final MetricType metricType,
+    private void send(byte[] aspect, long value, MetricType metricType, double sampleRate, Tag[] tags) {
+        ByteBuffer buffer = MSG_BUFFER.get();
+        formatMessage(buffer, prefix, aspect, metricType, value, sampleRate, tags);
+        sender.send(buffer);
+    }
+
+    private static void formatMessage(
+            final ByteBuffer buffer, final byte[] prefix, final byte[] metric, final MetricType metricType,
             final long value, final double sampleRate, final Tag... tags) {
+        // TODO realocate bigger buffer for this thread in case of out-of-bound
         buffer.clear();
         buffer.put(prefix);
-        buffer.putChar('.');
         buffer.put(metric);
-        buffer.putChar(':');
-        buffer.putLong(value);
-        buffer.putChar('|');
+        buffer.put((byte) ':');
+        putLong(buffer, value);
+        buffer.put((byte) '|');
         buffer.put(metricType.key);
-        buffer.putChar('|');
-        if (sampleRate != 1) {
-            buffer.putChar('@');
-            buffer.putDouble(sampleRate);
+        if (sampleRate != NO_SAMPLE_RATE) {
+            buffer.put((byte) '|');
+            buffer.put((byte) '@');
+            putDouble(buffer, sampleRate);
         }
         if (tags != null && tags.length > 0) {
-            buffer.putChar('|');
-            buffer.putChar('#');
+            buffer.put((byte) '|');
+            buffer.put((byte) '#');
             for (int i = 0; i < tags.length; i++) {
                 Tag tag = tags[i];
                 buffer.put(tag.getName());
-                buffer.putChar(':');
+                buffer.put((byte) ':');
                 buffer.put(tag.getValue());
                 if (i < tags.length - 1) {
-                    buffer.putChar(',');
+                    buffer.put((byte) ',');
                 }
             }
 
@@ -80,17 +94,20 @@ public final class FastStatsDClient implements StatsDClient, Closeable {
         buffer.flip();
     }
 
+    private static void putLong(ByteBuffer bb, long v) {
+        bb.put(String.valueOf(v).getBytes());
+    }
+
+    private static void putDouble(ByteBuffer bb, double v) {
+        bb.put(String.valueOf(v).getBytes());
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void gauge(final byte[] aspect, final long value, final Tag... tags) {
-
-        send(String.format("%s%s:%d|g|%s", prefix, aspect, value, tagString(tags)));
-    }
-
-    private String tagString(Tag[] tags) {
-        return null;
+        send(aspect, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
     }
 
     /**
@@ -98,25 +115,21 @@ public final class FastStatsDClient implements StatsDClient, Closeable {
      */
     @Override
     public void time(final byte[] aspect, final long timeInMs, final Tag... tags) {
-        send(String.format("%s%s:%d|ms|%s", prefix, aspect, timeInMs, tagString(tags)));
-    }
-
-    private void send(final String message) {
-//        queue.offer(message);
+        send(aspect, timeInMs, MetricType.TIMER, NO_SAMPLE_RATE, tags);
     }
 
     private boolean isInvalidSample(double sampleRate) {
-        return sampleRate != 1 && ThreadLocalRandom.current().nextDouble() > sampleRate;
+        return sampleRate < 0 || sampleRate > 1;
     }
 
     enum MetricType {
         GAUGE("g"), TIMER("ms"), COUNTER("c");
 
-        private MetricType(String key) {
+        MetricType(String key) {
             this.key = key.getBytes();
         }
 
-        private byte[] key;
+        private final byte[] key;
     }
 
 }

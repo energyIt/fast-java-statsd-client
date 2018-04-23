@@ -35,6 +35,22 @@ public interface StatsDClient {
      *     the name of the counter to adjust
      * @param delta
      *     the amount to adjust the counter by
+     * @param tags
+     *     array of tags to be added to the data
+     */
+    void count(byte[] aspect, long delta, Tag... tags);
+
+    /**
+     * Adjusts the specified counter by a given delta.
+     *
+     * <p>This method is a DataDog extension, and may not work with other servers.</p>
+     *
+     * <p>This method is non-blocking and is guaranteed not to throw an exception.</p>
+     *
+     * @param aspect
+     *     the name of the counter to adjust
+     * @param delta
+     *     the amount to adjust the counter by
      * @param sampleRate
      * 		percentage of time metric to be sent
      * @param tags
@@ -58,8 +74,4 @@ public interface StatsDClient {
      */
     void time(byte[] aspect, long timeInMs, Tag... tags);
 
-    interface  Tag {
-        byte[] getName();
-        byte[] getValue();
-    }
 }

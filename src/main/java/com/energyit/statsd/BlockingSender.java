@@ -40,26 +40,30 @@ class BlockingSender implements Sender , Closeable{
     }
 
     @Override
-    public void send(ByteBuffer msg) throws IOException {
+    public void send(ByteBuffer msg) {
 
 
-        final InetSocketAddress address = addressLookup.get();
+        try {
+            final InetSocketAddress address = addressLookup.get();
 
-        final int sizeOfBuffer = sendBuffer.position();
-        sendBuffer.flip();
+            final int sizeOfBuffer = sendBuffer.position();
+            sendBuffer.flip();
 
-        final int sentBytes = clientChannel.send(sendBuffer, address);
-        sendBuffer.limit(sendBuffer.capacity());
-        sendBuffer.rewind();
+            final int sentBytes = clientChannel.send(sendBuffer, address);
+            sendBuffer.limit(sendBuffer.capacity());
+            sendBuffer.rewind();
 
-        if (sizeOfBuffer != sentBytes) {
-            errorHandler.error(String.format(
-                    "Could not send entirely stat %s to host %s:%d. Only sent %d bytes out of %d bytes",
-                    sendBuffer.toString(),
-                    address.getHostName(),
-                    address.getPort(),
-                    sentBytes,
-                    sizeOfBuffer));
+            if (sizeOfBuffer != sentBytes) {
+                errorHandler.error(String.format(
+                        "Could not send entirely stat %s to host %s:%d. Only sent %d bytes out of %d bytes",
+                        sendBuffer.toString(),
+                        address.getHostName(),
+                        address.getPort(),
+                        sentBytes,
+                        sizeOfBuffer));
+            }
+        } catch (IOException e) {
+            errorHandler.handle(e);
         }
     }
 
