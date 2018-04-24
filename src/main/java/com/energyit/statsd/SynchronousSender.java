@@ -2,12 +2,14 @@ package com.energyit.statsd;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.function.Supplier;
 
-class BlockingSender implements Sender, Closeable {
+class SynchronousSender implements Sender, Closeable {
 
     private static final StatsDClientErrorHandler NO_OP_HANDLER = new StatsDClientErrorHandler() {
 
@@ -24,11 +26,19 @@ class BlockingSender implements Sender, Closeable {
 
     private final StatsDClientErrorHandler errorHandler;
 
-    BlockingSender(final Supplier<InetSocketAddress> addressLookup) {
+    SynchronousSender(final String hostname, final int port) {
+        this(hostname, port, NO_OP_HANDLER);
+    }
+
+    SynchronousSender(final String hostname, final int port, final StatsDClientErrorHandler errorHandler) {
+        this(() -> new InetSocketAddress(inetAddress(hostname), port), errorHandler);
+    }
+
+    SynchronousSender(final Supplier<InetSocketAddress> addressLookup) {
         this(addressLookup, NO_OP_HANDLER);
     }
 
-    BlockingSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+    SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
         this.addressLookup = addressLookup;
         this.errorHandler = errorHandler;
         try {
@@ -67,5 +77,13 @@ class BlockingSender implements Sender, Closeable {
             }
         }
 
+    }
+
+    private static InetAddress inetAddress(String hostname) {
+        try {
+            return InetAddress.getByName(hostname);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("Cannot create address", e);
+        }
     }
 }

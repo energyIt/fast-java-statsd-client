@@ -1,12 +1,14 @@
 package com.energyit.statsd;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  *
  */
 public final class FastStatsDClient implements StatsDClient {
 
+    public static final Charset MESSAGE_CHARSET = Charset.forName("UTF-8");
     private static final double NO_SAMPLE_RATE = 1.0;
     private static final ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(256));
 
@@ -19,7 +21,7 @@ public final class FastStatsDClient implements StatsDClient {
 
     public FastStatsDClient(final String prefix, final Sender sender) {
         if ((prefix != null) && (!prefix.isEmpty())) {
-            this.prefix = (prefix + '.').getBytes();
+            this.prefix = (prefix + '.').getBytes(MESSAGE_CHARSET);
         } else {
             this.prefix = new byte[0];
         }
@@ -105,7 +107,7 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
     private static void putDouble(ByteBuffer bb, double v) {
-        bb.put(String.valueOf(v).getBytes());
+        bb.put(String.valueOf(v).getBytes(MESSAGE_CHARSET));
     }
 
     private boolean isInvalidSample(double sampleRate) {
@@ -116,7 +118,7 @@ public final class FastStatsDClient implements StatsDClient {
         GAUGE("g"), TIMER("ms"), COUNTER("c");
 
         MetricType(String key) {
-            this.key = key.getBytes();
+            this.key = key.getBytes(MESSAGE_CHARSET);
         }
 
         private final byte[] key;
