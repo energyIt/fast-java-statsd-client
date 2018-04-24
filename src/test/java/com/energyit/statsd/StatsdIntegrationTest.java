@@ -5,6 +5,7 @@ import java.net.SocketException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -67,6 +68,7 @@ public class StatsdIntegrationTest {
         }
     }
 
+    @Ignore
     @Test(timeout = 5000L)
     public void sendingShouldBeQuick() {
         final Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
