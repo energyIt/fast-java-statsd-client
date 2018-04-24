@@ -16,5 +16,12 @@ public interface StatsDClientErrorHandler {
      */
     void handle(Exception exception);
 
-    void error(String error);
+    /**
+     * Handle the given handle, represented as a string message.
+     * Allows to avoid exception creation.
+     *
+     * @param errorFormat - error message template using String's format
+     * @param args to be used in the message template
+     */
+    void handle(String errorFormat, Object... args);
 }

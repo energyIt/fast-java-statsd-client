@@ -8,14 +8,11 @@ package com.energyit.statsd;
  *
  * @author Milos Gregor
  */
+// TODO : put other methods from statsd spec
 public interface StatsDClient {
 
     /**
      * Records the latest fixed value for the specified named gauge.
-     *
-     * <p>This method is a DataDog extension, and may not work with other servers.</p>
-     *
-     * <p>This method is non-blocking and is guaranteed not to throw an exception.</p>
      *
      * @param aspect
      *     the name of the gauge
@@ -26,10 +23,6 @@ public interface StatsDClient {
 
     /**
      * Adjusts the specified counter by a given delta.
-     *
-     * <p>This method is a DataDog extension, and may not work with other servers.</p>
-     *
-     * <p>This method is non-blocking and is guaranteed not to throw an exception.</p>
      *
      * @param aspect
      *     the name of the counter to adjust
@@ -42,10 +35,6 @@ public interface StatsDClient {
 
     /**
      * Adjusts the specified counter by a given delta.
-     *
-     * <p>This method is a DataDog extension, and may not work with other servers.</p>
-     *
-     * <p>This method is non-blocking and is guaranteed not to throw an exception.</p>
      *
      * @param aspect
      *     the name of the counter to adjust
@@ -60,10 +49,6 @@ public interface StatsDClient {
 
     /**
      * Records an execution time in milliseconds for the specified named operation.
-     *
-     * <p>This method is a DataDog extension, and may not work with other servers.</p>
-     *
-     * <p>This method is non-blocking and is guaranteed not to throw an exception.</p>
      *
      * @param aspect
      *     the name of the timed operation

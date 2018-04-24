@@ -1,7 +1,5 @@
 package com.energyit.statsd;
 
-import java.util.Arrays;
-
 public class TagImpl implements Tag {
     private final byte[] name;
     private final byte[] value;

@@ -3,25 +3,22 @@ package com.energyit.statsd;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.function.Supplier;
 
-class BlockingSender implements Sender , Closeable{
-    private static final int PACKET_SIZE_BYTES = 1400;
+class BlockingSender implements Sender, Closeable {
 
     private static final StatsDClientErrorHandler NO_OP_HANDLER = new StatsDClientErrorHandler() {
+
         @Override
         public void handle(final Exception e) { /* No-op */ }
 
         @Override
-        public void error(String error) { /* No-op */ }
+        public void handle(String errorFormat, Object... args) {
+
+        }
     };
-
-
-    private final ByteBuffer sendBuffer = ByteBuffer.allocateDirect(PACKET_SIZE_BYTES);
-
 
     private final Supplier<InetSocketAddress> addressLookup;
 
@@ -41,26 +38,13 @@ class BlockingSender implements Sender , Closeable{
 
     @Override
     public void send(ByteBuffer msg) {
-
-
         try {
             final InetSocketAddress address = addressLookup.get();
-
-            final int sizeOfBuffer = sendBuffer.position();
-            sendBuffer.flip();
-
-            final int sentBytes = clientChannel.send(sendBuffer, address);
-            sendBuffer.limit(sendBuffer.capacity());
-            sendBuffer.rewind();
-
+            final int sizeOfBuffer = msg.limit();
+            final int sentBytes = clientChannel.send(msg, address);
             if (sizeOfBuffer != sentBytes) {
-                errorHandler.error(String.format(
-                        "Could not send entirely stat %s to host %s:%d. Only sent %d bytes out of %d bytes",
-                        sendBuffer.toString(),
-                        address.getHostName(),
-                        address.getPort(),
-                        sentBytes,
-                        sizeOfBuffer));
+                errorHandler.handle("Could not send entirely stat %s to host %s:%d. Only sent %d bytes out of %d bytes",
+                        msg.toString(), address.getHostName(), address.getPort(), sentBytes, sizeOfBuffer);
             }
         } catch (IOException e) {
             errorHandler.handle(e);
