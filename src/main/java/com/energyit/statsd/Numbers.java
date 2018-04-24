@@ -7,7 +7,9 @@ import java.nio.ByteBuffer;
  *
  * @author Milos Gregor
  */
-class Numbers {
+final class Numbers {
+
+    private Numbers() { /* never to be called */}
 
     private static final char[] DigitTens = {
             '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
@@ -56,6 +58,7 @@ class Numbers {
 
     /**
      * Inspired by protected method Long.getChars().
+     *
      * @param i - long to put to buffer
      * @param buf - buffer to be written to
      */
@@ -76,7 +79,7 @@ class Numbers {
         // Get 2 digits/iteration using longs until quotient fits into an int
         while (i > Integer.MAX_VALUE) {
             q = i / 100;
-            // really: r = i - (q * 100);
+            // really: r = i - (q * 100)
             r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
             i = q;
             buf.put(--charPos, (byte) DigitOnes[r]);
@@ -88,7 +91,7 @@ class Numbers {
         int i2 = (int) i;
         while (i2 >= 65536) {
             q2 = i2 / 100;
-            // really: r = i2 - (q * 100);
+            // really: r = i2 - (q * 100)
             r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
             i2 = q2;
             buf.put(--charPos, (byte) DigitOnes[r]);
@@ -96,7 +99,7 @@ class Numbers {
         }
 
         // Fall thru to fast mode for smaller numbers
-        // assert(i2 <= 65536, i2);
+        // assert(i2 <= 65536, i2)
         for (; ; ) {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...

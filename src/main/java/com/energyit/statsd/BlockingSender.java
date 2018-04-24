@@ -15,20 +15,22 @@ class BlockingSender implements Sender, Closeable {
         public void handle(final Exception e) { /* No-op */ }
 
         @Override
-        public void handle(String errorFormat, Object... args) {
-
-        }
+        public void handle(String errorFormat, Object... args) { /* No-op */ }
     };
 
     private final Supplier<InetSocketAddress> addressLookup;
 
     private final DatagramChannel clientChannel;
 
-    private final StatsDClientErrorHandler errorHandler = NO_OP_HANDLER;
+    private final StatsDClientErrorHandler errorHandler;
 
     BlockingSender(final Supplier<InetSocketAddress> addressLookup) {
-        this.addressLookup = addressLookup;
+        this(addressLookup, NO_OP_HANDLER);
+    }
 
+    BlockingSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+        this.addressLookup = addressLookup;
+        this.errorHandler = errorHandler;
         try {
             clientChannel = DatagramChannel.open();
         } catch (final Exception e) {

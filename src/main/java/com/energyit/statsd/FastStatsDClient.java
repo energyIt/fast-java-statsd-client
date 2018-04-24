@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 public final class FastStatsDClient implements StatsDClient {
 
     private static final double NO_SAMPLE_RATE = 1.0;
-    private static ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(256));
+    private static final ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(256));
 
     private final byte[] prefix;
     private final Sender sender;
