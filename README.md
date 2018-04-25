@@ -6,4 +6,4 @@
 
 A statsd client library implemented in Java.  Allows for Java applications to easily communicate with statsd.
 
-This version was originally forked from [java-dogstatsd-client](https://github.com/indeedeng/java-dogstatsd-client) and simplified and made allocation free.
+This version was inspired by [java-dogstatsd-client](https://github.com/indeedeng/java-dogstatsd-client) but our major requirement was to reduce allocations and the performance impact on the running jvm.
