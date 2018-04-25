@@ -1,5 +1,4 @@
 language: java
-script: mvn clean test
 addons:
   sonarcloud:
     organization: "energy" # the key of the org you chose at step #3
