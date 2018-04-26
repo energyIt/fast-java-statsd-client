@@ -13,7 +13,6 @@ import org.junit.runners.JUnit4;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- *
  * @author gregmil
  */
 @RunWith(JUnit4.class)
@@ -35,7 +34,7 @@ public class StatsdIntegrationTest {
 
             @Override
             public void handle(String errorFormat, Object... args) {
-                System.out.format(errorFormat+"\n", args);
+                System.out.format(errorFormat + "\n", args);
             }
         });
         client = new FastStatsDClient("my.prefix", sender);
@@ -52,17 +51,18 @@ public class StatsdIntegrationTest {
     public void clean() {
         server.clear();
     }
+
     @Test(timeout = 5000L)
     public void countWithOneTagShouldBeSendCorrectly() {
         Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
         client.count("my.metric".getBytes(), 10, tag1);
         server.waitForMessage(1);
-        assertThat(server.messagesReceived()).containsExactly("my.prefix.my.metric:10|c|#"+tag1);
+        assertThat(server.messagesReceived()).containsExactly("my.prefix.my.metric:10|c|#" + tag1);
     }
 
     @Test(timeout = 5000L)
     public void sendingWithNoServerListeningShouldNotBlock() {
-        try (SynchronousSender sender = new SynchronousSender("localhost", STATSD_SERVER_PORT-1)) {
+        try (SynchronousSender sender = new SynchronousSender("localhost", STATSD_SERVER_PORT - 1)) {
             FastStatsDClient client = new FastStatsDClient(sender);
             client.count("my.metric".getBytes(), -5);
         }
@@ -78,9 +78,9 @@ public class StatsdIntegrationTest {
         for (int i = 0; i < n; i++) {
             client.count(bytes, i, tag1);
         }
-        System.out.println("Sending done in [ns] : " + (System.nanoTime()-start));
+        System.out.println("Sending done in [ns] : " + (System.nanoTime() - start));
         server.waitForMessage(n-1);
-        assertThat(server.messagesReceived()).contains("my.prefix.my.metric:10|c|#"+tag1);
-        System.out.println("All done in [ns] : " + (System.nanoTime()-start));
+        assertThat(server.messagesReceived()).contains("my.prefix.my.metric:10|c|#" + tag1);
+        System.out.println("All done in [ns] : " + (System.nanoTime() - start));
     }
 }

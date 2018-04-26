@@ -2,9 +2,7 @@ package com.energyit.statsd;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.function.Supplier;
@@ -42,7 +40,9 @@ class SynchronousSender implements Sender, Closeable {
         this.addressLookup = addressLookup;
         this.errorHandler = errorHandler;
         try {
-            clientChannel = DatagramChannel.open();
+            this.clientChannel = DatagramChannel.open();
+            this.clientChannel.setOption(StandardSocketOptions.SO_REUSEADDR, Boolean.TRUE);
+            this.clientChannel.connect(addressLookup.get());
         } catch (final Exception e) {
             throw new IllegalStateException("Failed to start StatsD client", e);
         }
@@ -51,12 +51,11 @@ class SynchronousSender implements Sender, Closeable {
     @Override
     public void send(ByteBuffer msg) {
         try {
-            final InetSocketAddress address = addressLookup.get();
             final int sizeOfBuffer = msg.limit();
-            final int sentBytes = clientChannel.send(msg, address);
+            final int sentBytes = clientChannel.write(msg);
             if (sizeOfBuffer != sentBytes) {
-                errorHandler.handle("Could not send entirely stat %s to host %s:%d. Only sent %d bytes out of %d bytes",
-                        msg.toString(), address.getHostName(), address.getPort(), sentBytes, sizeOfBuffer);
+                errorHandler.handle("Could not send entirely stat %s. Only sent %d bytes out of %d bytes",
+                        msg.toString(), sentBytes, sizeOfBuffer);
             }
         } catch (IOException e) {
             errorHandler.handle(e);
