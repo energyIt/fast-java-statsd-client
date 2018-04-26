@@ -24,7 +24,7 @@
   <scm>
     <url>https://github.com/energyIt/fast-java-statsd-client</url>
     <connection>scm:git:git://github.com/energyIt/fast-java-statsd-client.git</connection>
-    <developerConnection>scm:git:git@github.com:energyIt/fast-java-statsd-clientt.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:energyIt/fast-java-statsd-client.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
