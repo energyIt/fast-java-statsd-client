@@ -4,7 +4,7 @@
   <groupId>com.energyIt.statsd</groupId>
   <artifactId>fast-java-statsd-client</artifactId>
   <packaging>jar</packaging>
-  <version>0.1</version>
+  <version>0.2-SNAPSHOT</version>
   <description>A tiny library allowing Java applications to communicate with statsd servers in an efficent way.</description>
   <url>https://github.com/energyIt/fast-java-statsd-clien</url>
 
@@ -25,7 +25,7 @@
     <url>https://github.com/energyIt/fast-java-statsd-client</url>
     <connection>scm:git:git://github.com/energyIt/fast-java-statsd-client.git</connection>
     <developerConnection>scm:git:git@github.com:energyIt/fast-java-statsd-client.git</developerConnection>
-    <tag>0.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
