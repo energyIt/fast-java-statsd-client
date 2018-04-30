@@ -18,8 +18,6 @@ class SynchronousSender implements Sender, Closeable {
         public void handle(String errorFormat, Object... args) { /* No-op */ }
     };
 
-    private final Supplier<InetSocketAddress> addressLookup;
-
     private final DatagramChannel clientChannel;
 
     private final StatsDClientErrorHandler errorHandler;
@@ -32,15 +30,14 @@ class SynchronousSender implements Sender, Closeable {
         this(() -> new InetSocketAddress(inetAddress(hostname), port), errorHandler);
     }
 
-    SynchronousSender(final Supplier<InetSocketAddress> addressLookup) {
-        this(addressLookup, NO_OP_HANDLER);
+    SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+        this(SynchronousSender::newDatagramChannel, addressLookup, errorHandler);
     }
 
-    SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
-        this.addressLookup = addressLookup;
+    SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
         try {
-            this.clientChannel = DatagramChannel.open();
+            this.clientChannel = socketSupplier.get();
             this.clientChannel.setOption(StandardSocketOptions.SO_REUSEADDR, Boolean.TRUE);
             this.clientChannel.connect(addressLookup.get());
         } catch (final Exception e) {
@@ -83,6 +80,14 @@ class SynchronousSender implements Sender, Closeable {
             return InetAddress.getByName(hostname);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Cannot create address", e);
+        }
+    }
+
+    private static DatagramChannel newDatagramChannel() {
+        try {
+            return DatagramChannel.open();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to open channel", e);
         }
     }
 }
