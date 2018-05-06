@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 /**
  * Describes a client connection to a StatsD server, which may be used to post metrics

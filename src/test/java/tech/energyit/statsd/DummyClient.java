@@ -1,4 +1,6 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
+
+import tech.energyit.statsd.*;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;

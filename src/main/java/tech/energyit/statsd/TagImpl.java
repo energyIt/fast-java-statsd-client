@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 public class TagImpl implements Tag {
     private final byte[] name;

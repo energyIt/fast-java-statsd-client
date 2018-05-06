@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 import java.net.SocketException;
 import java.util.concurrent.TimeUnit;

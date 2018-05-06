@@ -1,11 +1,10 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @RunWith(MockitoJUnitRunner.class)

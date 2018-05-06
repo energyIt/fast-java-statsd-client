@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 import java.io.Closeable;
 import java.io.IOException;

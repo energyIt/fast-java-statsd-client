@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 /**
  * Describes a handler capable of processing exceptions that occur during StatsD client operations.

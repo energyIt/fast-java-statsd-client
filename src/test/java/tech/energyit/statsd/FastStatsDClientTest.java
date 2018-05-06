@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 import org.junit.Before;
 import org.junit.Test;

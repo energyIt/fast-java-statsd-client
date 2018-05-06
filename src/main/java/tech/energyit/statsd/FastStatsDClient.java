@@ -1,4 +1,4 @@
-package com.energyit.statsd;
+package tech.energyit.statsd;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
