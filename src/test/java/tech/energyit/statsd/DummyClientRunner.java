@@ -1,14 +1,12 @@
 package tech.energyit.statsd;
 
-import tech.energyit.statsd.*;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author gregmil
  */
-public class DummyClient {
+public class DummyClientRunner {
 
     private static final int STATSD_SERVER_PORT = 17254;
 
@@ -30,7 +28,7 @@ public class DummyClient {
 
             final Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
             final byte[] bytes = "my.metric".getBytes();
-            final int n = 10000000;
+            final int n = 10000;
             final long start = System.nanoTime();
             for (int i = 0; i < n; i++) {
                 client.count(bytes, i, tag1);

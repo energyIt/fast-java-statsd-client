@@ -8,7 +8,6 @@ package tech.energyit.statsd;
  *
  * @author Milos Gregor
  */
-// TODO : put other methods from statsd spec
 public interface StatsDClient {
 
     /**

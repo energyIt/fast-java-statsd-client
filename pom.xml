@@ -31,7 +31,10 @@
 
     <developers>
         <developer>
+            <id>milios</id>
             <name>Milos Gregor</name>
+            <url>https://github.com/milios</url>
+            <organizationUrl>http://energyit.tech</organizationUrl>
         </developer>
     </developers>
 

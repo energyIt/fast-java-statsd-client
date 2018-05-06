@@ -72,7 +72,6 @@ public final class FastStatsDClient implements StatsDClient {
     private static void formatMessage(
             final ByteBuffer buffer, final byte[] prefix, final byte[] metric, final MetricType metricType,
             final long value, final double sampleRate, final Tag... tags) {
-        // TODO realocate bigger buffer for this thread in case of out-of-bound (e.g. AGrona has expandable buffer)
         buffer.clear();
         buffer.put(prefix);
         buffer.put(metric);
