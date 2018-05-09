@@ -3,11 +3,13 @@
 
     <groupId>tech.energyit</groupId>
     <artifactId>fast-java-statsd-client</artifactId>
-    <packaging>jar</packaging>
     <version>0.4-SNAPSHOT</version>
-    <description>A tiny library allowing Java applications to communicate with statsd servers in an efficent way.
+    <packaging>jar</packaging>
+    <name>Fast Java Statsd Client</name>
+    <description>
+        A tiny library allowing Java applications to communicate with statsd servers in an efficent way.
     </description>
-    <url>https://github.com/energyIt/fast-java-statsd-clien</url>
+    <url>https://github.com/energyIt/fast-java-statsd-client</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,6 +30,21 @@
         <developerConnection>scm:git:git@github.com:energyIt/fast-java-statsd-client.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+
+    <distributionManagement>
+        <site>
+            <id>wiki</id>
+            <url>https://github.com/energyIt/fast-java-statsd-client/wiki</url>
+        </site>
+        <snapshotRepository>
+            <id>oss-repo-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>oss-repo-staging</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <developers>
         <developer>
@@ -62,29 +79,14 @@
 
     </dependencies>
 
-    <distributionManagement>
-        <site>
-            <id>wiki</id>
-            <url>https://github.com/energyIt/fast-java-statsd-client/wiki</url>
-        </site>
-        <snapshotRepository>
-            <id>oss-repo-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>oss-repo-staging</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
         </plugins>
