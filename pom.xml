@@ -32,10 +32,6 @@
     </scm>
 
     <distributionManagement>
-        <site>
-            <id>wiki</id>
-            <url>https://github.com/energyIt/fast-java-statsd-client/wiki</url>
-        </site>
         <snapshotRepository>
             <id>oss-repo-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
