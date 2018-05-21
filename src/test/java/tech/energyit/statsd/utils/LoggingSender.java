@@ -1,4 +1,6 @@
-package tech.energyit.statsd;
+package tech.energyit.statsd.utils;
+
+import tech.energyit.statsd.Sender;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

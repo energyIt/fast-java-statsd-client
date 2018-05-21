@@ -10,6 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import tech.energyit.statsd.utils.DummyStatsDServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

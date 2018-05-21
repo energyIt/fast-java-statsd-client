@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import tech.energyit.statsd.utils.LoggingSender;
 
 import java.nio.ByteBuffer;
 

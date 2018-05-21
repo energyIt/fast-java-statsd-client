@@ -1,4 +1,6 @@
-package tech.energyit.statsd;
+package tech.energyit.statsd.utils;
+
+import tech.energyit.statsd.FastStatsDClient;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -11,7 +13,7 @@ import java.util.function.Consumer;
 
 public final class DummyStatsDServer implements Closeable {
 
-    private static final int STATSD_SERVER_PORT = 17254;
+    public static final int STATSD_SERVER_PORT = 17254;
 
     private final List<String> messagesReceived = new ArrayList<>();
     private final DatagramSocket server;

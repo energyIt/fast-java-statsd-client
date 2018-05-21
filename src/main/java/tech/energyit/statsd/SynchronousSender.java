@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.function.Supplier;
 
-class SynchronousSender implements Sender, Closeable {
+public class SynchronousSender implements Sender, Closeable {
 
     private static final StatsDClientErrorHandler NO_OP_HANDLER = new StatsDClientErrorHandler() {
 
@@ -22,19 +22,19 @@ class SynchronousSender implements Sender, Closeable {
 
     private final StatsDClientErrorHandler errorHandler;
 
-    SynchronousSender(final String hostname, final int port) {
+    public SynchronousSender(final String hostname, final int port) {
         this(hostname, port, NO_OP_HANDLER);
     }
 
-    SynchronousSender(final String hostname, final int port, final StatsDClientErrorHandler errorHandler) {
+    public SynchronousSender(final String hostname, final int port, final StatsDClientErrorHandler errorHandler) {
         this(() -> new InetSocketAddress(inetAddress(hostname), port), errorHandler);
     }
 
-    SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+    public SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
         this(SynchronousSender::newDatagramChannel, addressLookup, errorHandler);
     }
 
-    SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+    public SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
         try {
             this.clientChannel = socketSupplier.get();
