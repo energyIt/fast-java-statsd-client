@@ -12,24 +12,13 @@ This version was inspired by [java-dogstatsd-client](https://github.com/indeeden
 ```
 Benchmark                                                          Mode  Cnt     Score     Error   Units
 countWithTagViaDatadogClient                                       avgt    5     1.641 ±   0.452   us/op
-countWithTagViaDatadogClient:·gc.alloc.rate                        avgt    5  1257.084 ± 730.464  MB/sec
 countWithTagViaDatadogClient:·gc.alloc.rate.norm                   avgt    5  2288.080 ± 551.177    B/op
-countWithTagViaDatadogClient:·gc.count                             avgt    5   173.000            counts
-countWithTagViaDatadogClient:·gc.time                              avgt    5   354.000                ms
 countWithTagViaFastClient                                          avgt    5     3.050 ±   0.435   us/op
-countWithTagViaFastClient:·gc.alloc.rate                           avgt    5     7.029 ±   1.082  MB/sec
 countWithTagViaFastClient:·gc.alloc.rate.norm                      avgt    5    24.000 ±   0.002    B/op
-countWithTagViaFastClient:·gc.count                                avgt    5     7.000            counts
-countWithTagViaFastClient:·gc.time                                 avgt    5    13.000                ms
 countWithTwoTagsViaDatadogClient                                   avgt    5     1.641 ±   0.519   us/op
 countWithTwoTagsViaDatadogClient:·gc.alloc.rate                    avgt    5  1368.544 ± 688.381  MB/sec
-countWithTwoTagsViaDatadogClient:·gc.count                         avgt    5   202.000            counts
-countWithTwoTagsViaDatadogClient:·gc.time                          avgt    5   387.000                ms
 countWithTwoTagsViaFastClient                                      avgt    5     3.184 ±   0.689   us/op
-countWithTwoTagsViaFastClient:·gc.alloc.rate                       avgt    5     6.747 ±   1.876  MB/sec
 countWithTwoTagsViaFastClient:·gc.alloc.rate.norm                  avgt    5    24.001 ±   0.002    B/op
-countWithTwoTagsViaFastClient:·gc.count                            avgt    5     6.000            counts
-countWithTwoTagsViaFastClient:·gc.time                             avgt    5    12.000                m
 ```
 See `StatsdClientBenchmark`
 
