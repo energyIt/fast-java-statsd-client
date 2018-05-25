@@ -16,7 +16,7 @@ countWithTagViaDatadogClient:·gc.alloc.rate.norm                   avgt    5  2
 countWithTagViaFastClient                                          avgt    5     3.050 ±   0.435   us/op
 countWithTagViaFastClient:·gc.alloc.rate.norm                      avgt    5    24.000 ±   0.002    B/op
 countWithTwoTagsViaDatadogClient                                   avgt    5     1.641 ±   0.519   us/op
-countWithTwoTagsViaDatadogClient:·gc.alloc.rate                    avgt    5  1368.544 ± 688.381  MB/sec
+countWithTwoTagsViaDatadogClient:·gc.alloc.rate.norm               avgt    5  2457.642 ± 606.220    B/op
 countWithTwoTagsViaFastClient                                      avgt    5     3.184 ±   0.689   us/op
 countWithTwoTagsViaFastClient:·gc.alloc.rate.norm                  avgt    5    24.001 ±   0.002    B/op
 ```
