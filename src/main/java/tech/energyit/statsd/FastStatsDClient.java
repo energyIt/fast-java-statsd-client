@@ -89,8 +89,8 @@ public final class FastStatsDClient implements StatsDClient {
         if (currentCapacity >= MAX_BUFFER_LENGTH) {
             throw new IllegalArgumentException("Message too big. This is maximum : " + MAX_BUFFER_LENGTH);
         }
-        long value = 2 * currentCapacity;
-        if (value > MAX_BUFFER_LENGTH) {
+        long value = 2L * currentCapacity;
+        if (value >= MAX_BUFFER_LENGTH) {
             value = MAX_BUFFER_LENGTH;
         }
         return (int) value;

@@ -1,5 +1,6 @@
 package tech.energyit.statsd.utils;
 
+import org.awaitility.Awaitility;
 import tech.energyit.statsd.FastStatsDClient;
 
 import java.io.Closeable;
@@ -9,7 +10,10 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import static org.awaitility.Awaitility.await;
 
 public final class DummyStatsDServer implements Closeable {
 
@@ -61,11 +65,7 @@ public final class DummyStatsDServer implements Closeable {
 
     public void waitForMessage(int minCount) {
         while (this.messageSize() < minCount) {
-            try {
-                Thread.sleep(50L);
-            } catch (InterruptedException var3) {
-                ;
-            }
+            await().atLeast(50L, TimeUnit.MILLISECONDS);
         }
 
     }
@@ -105,7 +105,7 @@ public final class DummyStatsDServer implements Closeable {
     public static void main(String[] args) throws SocketException, InterruptedException {
         DummyStatsDServer dummyStatsDServer = new DummyStatsDServer(STATSD_SERVER_PORT, (p) -> {/* do nothing */});
         while (true) {
-            Thread.sleep(1000);
+            await().atLeast(3, TimeUnit.SECONDS);
         }
     }
 }

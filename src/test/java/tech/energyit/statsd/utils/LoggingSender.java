@@ -11,13 +11,13 @@ public class LoggingSender implements Sender {
     private List<String> messages = new ArrayList<>();
 
     @Override
-    public void send(ByteBuffer msg) {
+    public synchronized void send(ByteBuffer msg) {
         byte[] bytes = new byte[msg.remaining()];
         msg.get(bytes);
         messages.add(new String(bytes));
     }
 
-    public List<String> getMessages() {
-        return messages;
+    public synchronized List<String> getMessages() {
+        return new ArrayList<>(messages);
     }
 }

@@ -70,20 +70,4 @@ public class StatsdIntegrationTest {
         }
     }
 
-    @Ignore
-    @Test(timeout = 5000L)
-    public void sendingShouldBeQuick() {
-        final Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
-        final byte[] bytes = "my.metric".getBytes();
-        final int n = 100000;
-        final long start = System.nanoTime();
-        for (int i = 0; i < n; i++) {
-            client.count(bytes, i, tag1);
-        }
-        System.out.println("Sending done in [ms] : " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
-        server.waitForMessage(n - 1);
-        assertThat(server.messagesReceived()).contains("my.prefix.my.metric:10|c|#" + tag1);
-        System.out.println("All done in [ms] : " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
-    }
-
 }

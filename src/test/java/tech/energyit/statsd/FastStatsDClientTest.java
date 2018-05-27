@@ -90,6 +90,12 @@ public class FastStatsDClientTest {
     }
 
     @Test
+    public void emptyTagsMustWorkOk() {
+        statsDClient.gauge("my.metric".getBytes(), 123456789, new Tag[0]);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:123456789|g");
+    }
+
+    @Test
     public void timeShouldBeSendCorrectly() {
         statsDClient.time("my.metric".getBytes(), -1234567890);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-1234567890|ms");
@@ -103,8 +109,15 @@ public class FastStatsDClientTest {
     }
 
     @Test
-    public void emptyPrefixShouldBeSendCorrectly() {
+    public void nullPrefixShouldBeSendCorrectly() {
         statsDClient = new FastStatsDClient(sender);
+        statsDClient.count("my.metric".getBytes(), 10);
+        assertThat(sender.getMessages()).containsExactly("my.metric:10|c");
+    }
+
+    @Test
+    public void emptyPrefixShouldBeSendCorrectly() {
+        statsDClient = new FastStatsDClient("", sender);
         statsDClient.count("my.metric".getBytes(), 10);
         assertThat(sender.getMessages()).containsExactly("my.metric:10|c");
     }
@@ -131,7 +144,7 @@ public class FastStatsDClientTest {
             executorService.execute(() -> {
                 int value = seq.incrementAndGet();
                 statsDClient.time("my.metric".getBytes(), value);
-                assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:" + value + "|ms");
+                assertThat(sender.getMessages()).contains("my.prefix.my.metric:" + value + "|ms");
             });
 
         }
