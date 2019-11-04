@@ -2,36 +2,28 @@ package tech.energyit.statsd;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.function.Supplier;
 
 public class SynchronousSender implements Sender, Closeable {
 
-    private static final StatsDClientErrorHandler NO_OP_HANDLER = new StatsDClientErrorHandler() {
-
-        @Override
-        public void handle(final Exception e) { /* No-op */ }
-
-        @Override
-        public void handle(String errorFormat, Object... args) { /* No-op */ }
-    };
-
     private final DatagramChannel clientChannel;
 
     private final StatsDClientErrorHandler errorHandler;
 
     public SynchronousSender(final String hostname, final int port) {
-        this(hostname, port, NO_OP_HANDLER);
+        this(hostname, port, StatsDClientErrorHandler.NO_OP_HANDLER);
     }
 
     public SynchronousSender(final String hostname, final int port, final StatsDClientErrorHandler errorHandler) {
-        this(() -> new InetSocketAddress(inetAddress(hostname), port), errorHandler);
+        this(() -> new InetSocketAddress(IOUtils.inetAddress(hostname), port), errorHandler);
     }
 
     public SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
-        this(SynchronousSender::newDatagramChannel, addressLookup, errorHandler);
+        this(IOUtils::newDatagramChannel, addressLookup, errorHandler);
     }
 
     public SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
@@ -75,19 +67,5 @@ public class SynchronousSender implements Sender, Closeable {
 
     }
 
-    private static InetAddress inetAddress(String hostname) {
-        try {
-            return InetAddress.getByName(hostname);
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Cannot create address", e);
-        }
-    }
 
-    private static DatagramChannel newDatagramChannel() {
-        try {
-            return DatagramChannel.open();
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to open channel", e);
-        }
-    }
 }

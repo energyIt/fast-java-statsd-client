@@ -24,4 +24,13 @@ public interface StatsDClientErrorHandler {
      * @param args to be used in the message template
      */
     void handle(String errorFormat, Object... args);
+
+    StatsDClientErrorHandler NO_OP_HANDLER = new StatsDClientErrorHandler() {
+
+        @Override
+        public void handle(final Exception e) { /* No-op */ }
+
+        @Override
+        public void handle(String errorFormat, Object... args) { /* No-op */ }
+    };
 }

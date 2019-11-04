@@ -1,6 +1,5 @@
 package tech.energyit.statsd.utils;
 
-import org.awaitility.Awaitility;
 import tech.energyit.statsd.FastStatsDClient;
 
 import java.io.Closeable;

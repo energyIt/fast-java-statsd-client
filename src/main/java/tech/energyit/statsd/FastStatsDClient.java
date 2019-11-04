@@ -10,10 +10,12 @@ import java.nio.charset.Charset;
 public final class FastStatsDClient implements StatsDClient {
 
     public static final Charset MESSAGE_CHARSET = Charset.forName("UTF-8");
-    static final double NO_SAMPLE_RATE = 1.0;
-    static final int MAX_BUFFER_LENGTH = 1024 * 1024;
+    public static final int INITIAL_BUFFER_SIZE = 128;
+    public static final int MAX_BUFFER_LENGTH = 1024 * 1024;
 
-    private static final ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> createByteBuffer(256));
+    static final double NO_SAMPLE_RATE = 1.0;
+
+    private static final ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> createByteBuffer(INITIAL_BUFFER_SIZE));
 
     private final byte[] prefix;
     private final Sender sender;
