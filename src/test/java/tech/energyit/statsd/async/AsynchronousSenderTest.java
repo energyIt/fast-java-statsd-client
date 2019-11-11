@@ -2,7 +2,6 @@ package tech.energyit.statsd.async;
 
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.time.Duration;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
@@ -59,13 +59,17 @@ public class AsynchronousSenderTest {
         sender.send(msgAsBuffer);
 
         //wait until msg is read
-        Awaitility.await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).until(() -> msgAsBuffer.position() == msgAsBuffer.limit());
+        waitUntilMsgIsRead(msgAsBuffer);
         ArgumentCaptor<ByteBuffer> sentMsg = ArgumentCaptor.forClass(ByteBuffer.class);
         verify(datagramChannel).write(sentMsg.capture());
         byte[] sentMessage = new byte[stringMessage.length()];
         ((ByteBuffer) sentMsg.getValue().flip()).get(sentMessage);
 
         Assertions.assertThat(new String(sentMessage)).isEqualTo(stringMessage);
+    }
+
+    private void waitUntilMsgIsRead(ByteBuffer msgAsBuffer) {
+        Awaitility.await().atMost(Duration.ofMillis(500)).until(() -> msgAsBuffer.position() == msgAsBuffer.limit());
     }
 
     @Test
@@ -79,8 +83,7 @@ public class AsynchronousSenderTest {
             sender.send(msgAsBuffer);
         }
 
-        //wait until last msg is read
-        Awaitility.await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).until(() -> msgAsBuffer.position() == msgAsBuffer.limit());
+        waitUntilMsgIsRead(msgAsBuffer);
         verify(datagramChannel, times(batchSize)).write(any(ByteBuffer.class));
     }
 
@@ -93,8 +96,7 @@ public class AsynchronousSenderTest {
         ByteBuffer msgAsBuffer = ByteBuffer.wrap(msg);
         sender.send(msgAsBuffer);
 
-        //wait until msg is read
-        Awaitility.await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).until(() -> msgAsBuffer.position() == msgAsBuffer.limit());
+        waitUntilMsgIsRead(msgAsBuffer);
         ArgumentCaptor<ByteBuffer> sentMsg = ArgumentCaptor.forClass(ByteBuffer.class);
         verify(datagramChannel).write(sentMsg.capture());
         byte[] sentMessage = new byte[msg.length];
@@ -123,8 +125,7 @@ public class AsynchronousSenderTest {
             sender.send(msgAsBuffer);
         }
 
-        //wait until last msg is read
-        Awaitility.await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).until(() -> msgAsBuffer.position() == msgAsBuffer.limit());
+        waitUntilMsgIsRead(msgAsBuffer);
         verify(datagramChannel, atLeast(ringbufferSize)).write(any(ByteBuffer.class));
     }
 

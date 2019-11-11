@@ -3,13 +3,15 @@ package tech.energyit.statsd;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 /**
  * Important note : Maximal (total) message size can only be {@value MAX_BUFFER_LENGTH}B,
  */
 public final class FastStatsDClient implements StatsDClient {
 
-    public static final Charset MESSAGE_CHARSET = Charset.forName("UTF-8");
+    public static final Charset MESSAGE_CHARSET = StandardCharsets.UTF_8;
     public static final int INITIAL_BUFFER_SIZE = 128;
     public static final int MAX_BUFFER_LENGTH = 1024 * 1024;
 
@@ -33,17 +35,13 @@ public final class FastStatsDClient implements StatsDClient {
         this.sender = sender;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void count(final byte[] aspect, final long delta, final Tag... tags) {
         send(aspect, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void count(final byte[] aspect, final long delta, final double sampleRate, final Tag... tags) {
         if (isInvalidSample(sampleRate)) {
@@ -52,34 +50,149 @@ public final class FastStatsDClient implements StatsDClient {
         send(aspect, delta, MetricType.COUNTER, sampleRate, tags);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
+    @Override
+    public void count(final byte[] aspect, final double delta, final Tag... tags) {
+        send(aspect, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
+    }
+
+
+    @Override
+    public void count(final byte[] aspect, final double delta, final double sampleRate, final Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, delta, MetricType.COUNTER, sampleRate, tags);
+    }
+
     @Override
     public void gauge(final byte[] aspect, final long value, final Tag... tags) {
         send(aspect, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
+    @Override
+    public void gauge(byte[] aspect, long value, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, value, MetricType.GAUGE, sampleRate, tags);
+    }
+
+
+    @Override
+    public void gauge(byte[] aspect, double value, Tag... tags) {
+        send(aspect, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
+    }
+
+
+    @Override
+    public void gauge(byte[] aspect, double value, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, value, MetricType.GAUGE, sampleRate, tags);
+    }
+
+
     @Override
     public void time(final byte[] aspect, final long timeInMs, final Tag... tags) {
         send(aspect, timeInMs, MetricType.TIMER, NO_SAMPLE_RATE, tags);
     }
 
+    @Override
+    public void time(byte[] aspect, long timeInMs, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, timeInMs, MetricType.TIMER, sampleRate, tags);
+    }
+
+    @Override
+    public void histogram(byte[] aspect, long value, Tag... tags) {
+        send(aspect, value, MetricType.HISTOGRAM, NO_SAMPLE_RATE, tags);
+    }
+
+    @Override
+    public void histogram(byte[] aspect, long value, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, value, MetricType.HISTOGRAM, sampleRate, tags);
+    }
+
+    @Override
+    public void histogram(byte[] aspect, double value, Tag... tags) {
+        send(aspect, value, MetricType.HISTOGRAM, NO_SAMPLE_RATE, tags);
+    }
+
+    @Override
+    public void histogram(byte[] aspect, double value, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, value, MetricType.HISTOGRAM, sampleRate, tags);
+    }
+
+    @Override
+    public void set(byte[] aspect, long value, Tag... tags) {
+        send(aspect, value, MetricType.SET, NO_SAMPLE_RATE, tags);
+    }
+
+    @Override
+    public void set(byte[] aspect, long value, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, value, MetricType.SET, sampleRate, tags);
+    }
+
+    @Override
+    public void set(byte[] aspect, double value, Tag... tags) {
+        send(aspect, value, MetricType.SET, NO_SAMPLE_RATE, tags);
+    }
+
+    @Override
+    public void set(byte[] aspect, double value, double sampleRate, Tag... tags) {
+        if (isInvalidSample(sampleRate)) {
+            return;
+        }
+        send(aspect, value, MetricType.SET, sampleRate, tags);
+    }
+
     public void clear() {
         MSG_BUFFER.remove();
     }
+
     /**
      * @throws IllegalArgumentException if the message is too large
      */
     private void send(byte[] aspect, long value, MetricType metricType, double sampleRate, Tag[] tags) {
+        send(buffer ->
+                formatMessage(buffer, prefix, aspect, metricType, bb -> {
+                    putLong(bb, value);
+                }, sampleRate, tags));
+    }
+
+    /**
+     * @throws IllegalArgumentException if the message is too large
+     */
+    private void send(byte[] aspect, double value, MetricType metricType, double sampleRate, Tag[] tags) {
+        send(buffer ->
+                formatMessage(buffer, prefix, aspect, metricType, bb -> {
+                    putDouble(bb, value);
+                }, sampleRate, tags));
+    }
+
+    /**
+     * @throws IllegalArgumentException if the message is too large
+     */
+    private void send(Consumer<ByteBuffer> messageFormatter) {
         ByteBuffer buffer = MSG_BUFFER.get();
         boolean formatted = false;
-        while(!formatted) {
+        while (!formatted) {
             try {
-                formatMessage(buffer, prefix, aspect, metricType, value, sampleRate, tags);
+                messageFormatter.accept(buffer);
                 formatted = true;
             } catch (BufferOverflowException e) {
                 // bigger messages are exceptional so using Exceptions should be good enough
@@ -103,12 +216,12 @@ public final class FastStatsDClient implements StatsDClient {
 
     private static void formatMessage(
             final ByteBuffer buffer, final byte[] prefix, final byte[] metric, final MetricType metricType,
-            final long value, final double sampleRate, final Tag... tags) {
+            final Consumer<ByteBuffer> valuePutHandler, final double sampleRate, final Tag... tags) {
         buffer.clear();
         buffer.put(prefix);
         buffer.put(metric);
         buffer.put((byte) ':');
-        putLong(buffer, value);
+        valuePutHandler.accept(buffer);
         buffer.put((byte) '|');
         buffer.put(metricType.key);
         if (sampleRate != NO_SAMPLE_RATE) {
@@ -150,7 +263,7 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
     enum MetricType {
-        GAUGE("g"), TIMER("ms"), COUNTER("c");
+        GAUGE("g"), TIMER("ms"), COUNTER("c"), HISTOGRAM("h"), SET("s");
 
         MetricType(String key) {
             this.key = key.getBytes(MESSAGE_CHARSET);

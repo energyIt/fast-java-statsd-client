@@ -43,8 +43,20 @@ public class FastStatsDClientTest {
     }
 
     @Test
-    public void negativeRateShouldMakeTheMessageIgnored() {
+    public void countWithNegativeRateShouldMakeTheMessageIgnored() {
         statsDClient.count("my.metric".getBytes(), 10, -5);
+        assertThat(sender.getMessages()).isEmpty();
+    }
+
+    @Test
+    public void doubleCounterWithRateShouldBeSendCorrectly() {
+        statsDClient.count("my.metric".getBytes(), 10.4567, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.4567|c|@0.1");
+    }
+
+    @Test
+    public void doubleCountWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.count("my.metric".getBytes(), 10.4567, -5);
         assertThat(sender.getMessages()).isEmpty();
     }
 
@@ -68,6 +80,13 @@ public class FastStatsDClientTest {
     }
 
     @Test
+    public void doubleCounterWithOneTagShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        statsDClient.count("my.metric".getBytes(), 10.4567, tag1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.4567|c|#" + tag1);
+    }
+
+    @Test
     public void countWithRateAndOneTagShouldBeSendCorrectly() {
         Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
         statsDClient.count("my.metric".getBytes(), 10, 0.1, tag1);
@@ -75,9 +94,39 @@ public class FastStatsDClientTest {
     }
 
     @Test
-    public void gaugeShouldBeSendCorrectly() {
+    public void longGaugeShouldBeSendCorrectly() {
         statsDClient.gauge("my.metric".getBytes(), -1234567890123456789L);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-1234567890123456789|g");
+    }
+
+    @Test
+    public void gaugeWithRateShouldBeSendCorrectly() {
+        statsDClient.gauge("my.metric".getBytes(), 10, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10|g|@0.1");
+    }
+
+    @Test
+    public void gaugeWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.gauge("my.metric".getBytes(), 10, -5);
+        assertThat(sender.getMessages()).isEmpty();
+    }
+
+    @Test
+    public void doubleGaugeShouldBeSendCorrectly() {
+        statsDClient.gauge("my.metric".getBytes(), -10.45678);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.45678|g");
+    }
+
+    @Test
+    public void doubleGaugeWithRateShouldBeSendCorrectly() {
+        statsDClient.gauge("my.metric".getBytes(), 10.4567, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.4567|g|@0.1");
+    }
+
+    @Test
+    public void doubleGaugeWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.gauge("my.metric".getBytes(), 10.4567, -5);
+        assertThat(sender.getMessages()).isEmpty();
     }
 
     @Test
@@ -96,7 +145,7 @@ public class FastStatsDClientTest {
     }
 
     @Test
-    public void emptyTagsMustWorkOk() {
+    public void gaugeWithEmptyTagsShouldBeSendCorrectly() {
         statsDClient.gauge("my.metric".getBytes(), 123456789, new Tag[0]);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:123456789|g");
     }
@@ -112,6 +161,18 @@ public class FastStatsDClientTest {
         Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
         statsDClient.time("my.metric".getBytes(), 1234567890, tag1);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:1234567890|ms|#" + tag1);
+    }
+
+    @Test
+    public void timeWithRateShouldBeSendCorrectly() {
+        statsDClient.time("my.metric".getBytes(), 10, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10|ms|@0.1");
+    }
+
+    @Test
+    public void timeWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.time("my.metric".getBytes(), 10, -5);
+        assertThat(sender.getMessages()).isEmpty();
     }
 
     @Test
@@ -156,5 +217,110 @@ public class FastStatsDClientTest {
         }
 
 
+    }
+
+
+    @Test
+    public void longHistogramShouldBeSendCorrectly() {
+        statsDClient.histogram("my.metric".getBytes(), -1234567890123456789L);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-1234567890123456789|h");
+    }
+
+    @Test
+    public void histogramWithRateShouldBeSendCorrectly() {
+        statsDClient.histogram("my.metric".getBytes(), 10, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10|h|@0.1");
+    }
+
+    @Test
+    public void histogramWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.histogram("my.metric".getBytes(), 10, -5);
+        assertThat(sender.getMessages()).isEmpty();
+    }
+
+    @Test
+    public void doubleHistogramShouldBeSendCorrectly() {
+        statsDClient.histogram("my.metric".getBytes(), -10.45678);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.45678|h");
+    }
+
+
+    @Test
+    public void doubleHistogramWithRateShouldBeSendCorrectly() {
+        statsDClient.histogram("my.metric".getBytes(), 10.12, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.12|h|@0.1");
+    }
+
+    @Test
+    public void doubleHistogramWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.histogram("my.metric".getBytes(), 10.12, -5);
+        assertThat(sender.getMessages()).isEmpty();
+    }
+
+    @Test
+    public void histogramWithOneTagShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        statsDClient.histogram("my.metric".getBytes(), 1234567890123456L, tag1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:1234567890123456|h|#" + tag1);
+    }
+
+    @Test
+    public void histogramWithTwoTagsShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        Tag tag2 = new TagImpl("tag2".getBytes(), "val2".getBytes());
+        statsDClient.histogram("my.metric".getBytes(), 10.4567, tag1, tag2);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.4567|h|#" + tag1 + ',' + tag2);
+    }
+
+    @Test
+    public void longSetShouldBeSendCorrectly() {
+        statsDClient.set("my.metric".getBytes(), -1234567890123456789L);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-1234567890123456789|s");
+    }
+
+    @Test
+    public void setWithRateShouldBeSendCorrectly() {
+        statsDClient.set("my.metric".getBytes(), 10, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10|s|@0.1");
+    }
+
+    @Test
+    public void setWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.set("my.metric".getBytes(), 10, -5);
+        assertThat(sender.getMessages()).isEmpty();
+    }
+
+    @Test
+    public void doubleSetShouldBeSendCorrectly() {
+        statsDClient.set("my.metric".getBytes(), -10.45678);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.45678|s");
+    }
+
+
+    @Test
+    public void doubleSetWithRateShouldBeSendCorrectly() {
+        statsDClient.set("my.metric".getBytes(), 10.12, 0.1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.12|s|@0.1");
+    }
+
+    @Test
+    public void doubleSetWithNegativeRateShouldMakeTheMessageIgnored() {
+        statsDClient.set("my.metric".getBytes(), 10.12, -5);
+        assertThat(sender.getMessages()).isEmpty();
+    }
+
+    @Test
+    public void setWithOneTagShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        statsDClient.set("my.metric".getBytes(), 1234567890123456L, tag1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:1234567890123456|s|#" + tag1);
+    }
+
+    @Test
+    public void setWithTwoTagsShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        Tag tag2 = new TagImpl("tag2".getBytes(), "val2".getBytes());
+        statsDClient.set("my.metric".getBytes(), 10.4567, tag1, tag2);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.4567|s|#" + tag1 + ',' + tag2);
     }
 }
