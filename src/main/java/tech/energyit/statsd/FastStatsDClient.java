@@ -68,6 +68,9 @@ public final class FastStatsDClient implements StatsDClient {
         send(aspect, timeInMs, MetricType.TIMER, NO_SAMPLE_RATE, tags);
     }
 
+    public void clear() {
+        MSG_BUFFER.remove();
+    }
     /**
      * @throws IllegalArgumentException if the message is too large
      */

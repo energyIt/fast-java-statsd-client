@@ -60,7 +60,7 @@ public class SynchronousSender implements Sender, Closeable {
         if (clientChannel != null) {
             try {
                 clientChannel.close();
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 errorHandler.handle(e);
             }
         }

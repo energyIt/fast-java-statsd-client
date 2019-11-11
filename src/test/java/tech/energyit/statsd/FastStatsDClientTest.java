@@ -1,5 +1,6 @@
 package tech.energyit.statsd;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +23,11 @@ public class FastStatsDClientTest {
     public void setUp() {
         sender = new LoggingSender();
         statsDClient = new FastStatsDClient("my.prefix", sender);
+    }
+
+    @After
+    public void teardown() {
+        statsDClient.clear();
     }
 
     @Test
