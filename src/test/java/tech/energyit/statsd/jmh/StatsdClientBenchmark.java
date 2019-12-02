@@ -18,7 +18,7 @@ import tech.energyit.statsd.utils.DummyStatsDServer;
 import java.util.concurrent.TimeUnit;
 
 @Fork(1)
-@Warmup(iterations = 2)
+@Warmup(iterations = 1)
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @BenchmarkMode(Mode.AverageTime)
@@ -34,7 +34,7 @@ public class StatsdClientBenchmark {
 
     private static final Tag TAG1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
     private static final Tag TAG2 = new TagImpl("tag2".getBytes(), "val2".getBytes());
-
+    private static final Tag[] THE_TWO_TAGS = {TAG1, TAG2};
     private static final String METRIC = "my.metric";
     private static final byte[] METRIC_RAW = METRIC.getBytes();
 
@@ -52,11 +52,12 @@ public class StatsdClientBenchmark {
         syncSender = new SynchronousSender(LOCALHOST, STATSD_SERVER_PORT);
         asyncSender = AsynchronousSender.builder()
                 .withHostAndPort(LOCALHOST, STATSD_SERVER_PORT)
-                .withRingbufferSize(1024 * 1024)
+                .withRingbufferSize(1024)
+                .skipMessageWhenRingbufferIsFull()
                 .build();
         asyncSenderWithFallback = AsynchronousSender.builder()
                 .withHostAndPort(LOCALHOST, STATSD_SERVER_PORT)
-                .withRingbufferSize(1024 * 1024)
+                .withRingbufferSize(1024)
                 .publishSynchronouslyWhenRingbufferIsFull()
                 .build();
         statsDClient = new FastStatsDClient(PREFIX, syncSender);
@@ -76,17 +77,17 @@ public class StatsdClientBenchmark {
 
     @Benchmark
     public void countWithTwoTagsViaSyncFastClient(Blackhole bh) {
-        statsDClient.count(METRIC_RAW, bh.i1, TAG1, TAG2);
+        statsDClient.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
     }
 
     @Benchmark
     public void countWithTwoTagsViaAsyncFastClient(Blackhole bh) {
-        asyncStatsDClient.count(METRIC_RAW, bh.i1, TAG1, TAG2);
+        asyncStatsDClient.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
     }
 
     @Benchmark
     public void countWithTwoTagsViaAsyncFastClient2(Blackhole bh) {
-        asyncStatsDClient2.count(METRIC_RAW, bh.i1, TAG1, TAG2);
+        asyncStatsDClient2.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
     }
 
     @Benchmark

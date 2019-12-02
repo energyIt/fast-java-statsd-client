@@ -10,15 +10,22 @@ This version was inspired by [java-dogstatsd-client](https://github.com/indeeden
 
 ## Allocation Rate Comparison
 ```
-Benchmark                                                          Mode  Cnt     Score     Error   Units
-countWithTagViaDatadogClient                                       avgt    5     1.641 ±   0.452   us/op
-countWithTagViaDatadogClient:·gc.alloc.rate.norm                   avgt    5  2288.080 ± 551.177    B/op
-countWithTagViaFastClient                                          avgt    5     3.050 ±   0.435   us/op
-countWithTagViaFastClient:·gc.alloc.rate.norm                      avgt    5    24.000 ±   0.002    B/op
-countWithTwoTagsViaDatadogClient                                   avgt    5     1.641 ±   0.519   us/op
-countWithTwoTagsViaDatadogClient:·gc.alloc.rate.norm               avgt    5  2457.642 ± 606.220    B/op
-countWithTwoTagsViaFastClient                                      avgt    5     3.184 ±   0.689   us/op
-countWithTwoTagsViaFastClient:·gc.alloc.rate.norm                  avgt    5    24.001 ±   0.002    B/op
+Benchmark                                                                                    Mode  Cnt     Score   Error   Units
+ StatsdClientBenchmark.countWithTwoTagsViaSyncFastClient                                     avgt          3.015           us/op
+ StatsdClientBenchmark.countWithTwoTagsViaSyncFastClient:·gc.alloc.rate                      avgt         ≈ 10⁻³          MB/sec
+ StatsdClientBenchmark.countWithTwoTagsViaSyncFastClient:·gc.alloc.rate.norm                 avgt          0.002            B/op
+
+ StatsdClientBenchmark.countWithTwoTagsViaAsyncFastClient                                    avgt          0.116           us/op
+ StatsdClientBenchmark.countWithTwoTagsViaAsyncFastClient:·gc.alloc.rate                     avgt          0.080          MB/sec
+ StatsdClientBenchmark.countWithTwoTagsViaAsyncFastClient:·gc.alloc.rate.norm                avgt          0.011            B/op
+ 
+ StatsdClientBenchmark.countWithTwoTagsViaAsyncFastClient2                                   avgt          5.969           us/op
+ StatsdClientBenchmark.countWithTwoTagsViaAsyncFastClient2:·gc.alloc.rate                    avgt          0.008          MB/sec
+ StatsdClientBenchmark.countWithTwoTagsViaAsyncFastClient2:·gc.alloc.rate.norm               avgt          0.055            B/op
+
+ StatsdClientBenchmark.countWithTwoTagsViaDatadogClient                                      avgt          1.477           us/op
+ StatsdClientBenchmark.countWithTwoTagsViaDatadogClient:·gc.alloc.rate                       avgt        339.016          MB/sec
+ StatsdClientBenchmark.countWithTwoTagsViaDatadogClient:·gc.alloc.rate.norm                  avgt        639.998            B/op
 ```
 See `StatsdClientBenchmark`
 

@@ -3,7 +3,6 @@ package tech.energyit.statsd.utils;
 import tech.energyit.statsd.*;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author gregmil
@@ -30,11 +29,10 @@ public class DummyClientRunner {
 
             final Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
             final byte[] bytes = "my.metric".getBytes();
-            final int n = 10000;
+            final int n = 1000000;
             final long start = System.nanoTime();
             for (int i = 0; i < n; i++) {
                 client.count(bytes, i, tag1);
-                LockSupport.parkNanos(100);
             }
             System.out.println("Sending done in [ms] : " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
         }

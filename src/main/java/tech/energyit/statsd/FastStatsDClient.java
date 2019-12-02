@@ -4,7 +4,6 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
 
 /**
  * Important note : Maximal (total) message size can only be {@value MAX_BUFFER_LENGTH}B,
@@ -167,32 +166,16 @@ public final class FastStatsDClient implements StatsDClient {
     /**
      * @throws IllegalArgumentException if the message is too large
      */
-    private void send(byte[] aspect, long value, MetricType metricType, double sampleRate, Tag[] tags) {
-        send(buffer ->
-                formatMessage(buffer, prefix, aspect, metricType, bb -> {
-                    putLong(bb, value);
-                }, sampleRate, tags));
-    }
-
-    /**
-     * @throws IllegalArgumentException if the message is too large
-     */
-    private void send(byte[] aspect, double value, MetricType metricType, double sampleRate, Tag[] tags) {
-        send(buffer ->
-                formatMessage(buffer, prefix, aspect, metricType, bb -> {
-                    putDouble(bb, value);
-                }, sampleRate, tags));
-    }
-
-    /**
-     * @throws IllegalArgumentException if the message is too large
-     */
-    private void send(Consumer<ByteBuffer> messageFormatter) {
+    private void send(byte[] metricName, long value, MetricType metricType, double sampleRate, Tag[] tags) {
         ByteBuffer buffer = MSG_BUFFER.get();
         boolean formatted = false;
         while (!formatted) {
             try {
-                messageFormatter.accept(buffer);
+                buffer.clear();
+                putPrefix(metricName, buffer);
+                putLong(buffer, value);
+                putSuffix(buffer, metricType, sampleRate, tags);
+                buffer.flip();
                 formatted = true;
             } catch (BufferOverflowException e) {
                 // bigger messages are exceptional so using Exceptions should be good enough
@@ -203,25 +186,36 @@ public final class FastStatsDClient implements StatsDClient {
         sender.send(buffer);
     }
 
-    private static int newCapacity(final int currentCapacity) {
-        if (currentCapacity >= MAX_BUFFER_LENGTH) {
-            throw new IllegalArgumentException("Message too big. This is maximum : " + MAX_BUFFER_LENGTH);
+    /**
+     * @throws IllegalArgumentException if the message is too large
+     */
+    private void send(byte[] metricName, double value, MetricType metricType, double sampleRate, Tag[] tags) {
+        ByteBuffer buffer = MSG_BUFFER.get();
+        boolean formatted = false;
+        while (!formatted) {
+            try {
+                buffer.clear();
+                putPrefix(metricName, buffer);
+                putDouble(buffer, value);
+                putSuffix(buffer, metricType, sampleRate, tags);
+                buffer.flip();
+                formatted = true;
+            } catch (BufferOverflowException e) {
+                // bigger messages are exceptional so using Exceptions should be good enough
+                buffer = createByteBuffer(newCapacity(buffer.capacity()));
+                MSG_BUFFER.set(buffer);
+            }
         }
-        long value = 2L * currentCapacity;
-        if (value >= MAX_BUFFER_LENGTH) {
-            value = MAX_BUFFER_LENGTH;
-        }
-        return (int) value;
+        sender.send(buffer);
     }
 
-    private static void formatMessage(
-            final ByteBuffer buffer, final byte[] prefix, final byte[] metric, final MetricType metricType,
-            final Consumer<ByteBuffer> valuePutHandler, final double sampleRate, final Tag... tags) {
-        buffer.clear();
+    private void putPrefix(byte[] metricName, ByteBuffer buffer) {
         buffer.put(prefix);
-        buffer.put(metric);
+        buffer.put(metricName);
         buffer.put((byte) ':');
-        valuePutHandler.accept(buffer);
+    }
+
+    private void putSuffix(ByteBuffer buffer, MetricType metricType, double sampleRate, Tag[] tags) {
         buffer.put((byte) '|');
         buffer.put(metricType.key);
         if (sampleRate != NO_SAMPLE_RATE) {
@@ -243,8 +237,19 @@ public final class FastStatsDClient implements StatsDClient {
             }
 
         }
-        buffer.flip();
     }
+
+    private static int newCapacity(final int currentCapacity) {
+        if (currentCapacity >= MAX_BUFFER_LENGTH) {
+            throw new IllegalArgumentException("Message too big. This is maximum : " + MAX_BUFFER_LENGTH);
+        }
+        long value = 2L * currentCapacity;
+        if (value >= MAX_BUFFER_LENGTH) {
+            value = MAX_BUFFER_LENGTH;
+        }
+        return (int) value;
+    }
+
 
     private static void putLong(ByteBuffer bb, long v) {
         Numbers.putLongAsAsciiBytes(v, bb);
