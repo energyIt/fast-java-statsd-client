@@ -1,16 +1,14 @@
 package tech.energyit.statsd;
 
-import java.net.SocketException;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import tech.energyit.statsd.utils.DummyStatsDServer;
+
+import java.net.SocketException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,18 +25,19 @@ public class StatsdIntegrationTest {
 
     @BeforeClass
     public static void start() throws SocketException {
-        sender = new SynchronousSender("localhost", STATSD_SERVER_PORT, new StatsDClientErrorHandler() {
+        sender = SynchronousSender.builder()
+                .withHostAndPort("localhost", STATSD_SERVER_PORT)
+                .withErrorHandler(new StatsDClientErrorHandler() {
+                    @Override
+                    public void handle(Exception exception) {
+                        exception.printStackTrace();
+                    }
 
-            @Override
-            public void handle(Exception exception) {
-                exception.printStackTrace();
-            }
-
-            @Override
-            public void handle(String errorFormat, Object... args) {
-                System.out.format(errorFormat + "\n", args);
-            }
-        });
+                    @Override
+                    public void handle(String errorFormat, Object... args) {
+                        System.out.format(errorFormat + "\n", args);
+                    }
+                }).build();
         client = new FastStatsDClient("my.prefix", sender);
         server = new DummyStatsDServer(STATSD_SERVER_PORT);
     }
@@ -64,7 +63,9 @@ public class StatsdIntegrationTest {
 
     @Test(timeout = 5000L)
     public void sendingWithNoServerListeningShouldNotBlock() {
-        try (SynchronousSender sender = new SynchronousSender("localhost", STATSD_SERVER_PORT - 1)) {
+        try (SynchronousSender sender = SynchronousSender.builder()
+                .withHostAndPort("localhost", STATSD_SERVER_PORT - 1)
+                .build()) {
             FastStatsDClient client = new FastStatsDClient(sender);
             client.count("my.metric".getBytes(), -5);
         }

@@ -6,6 +6,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
+ * {@link StatsDClient} implementation
+ * uses thread-local {@link ByteBuffer} for efficient message format.
+ * For long values it has ZERO allocations.
+ *
  * Important note : Maximal (total) message size can only be {@value MAX_BUFFER_LENGTH}B,
  */
 public final class FastStatsDClient implements StatsDClient {
@@ -164,6 +168,7 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
     /**
+     * format and send with long value.
      * @throws IllegalArgumentException if the message is too large
      */
     private void send(byte[] metricName, long value, MetricType metricType, double sampleRate, Tag[] tags) {
@@ -187,6 +192,7 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
     /**
+     * format and send with double value.
      * @throws IllegalArgumentException if the message is too large
      */
     private void send(byte[] metricName, double value, MetricType metricType, double sampleRate, Tag[] tags) {

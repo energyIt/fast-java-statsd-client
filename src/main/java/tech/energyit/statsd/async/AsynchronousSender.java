@@ -36,7 +36,11 @@ public class AsynchronousSender implements Sender, Closeable {
                                final int ringbufferSize,
                                final BiConsumer<AsynchronousSender, ByteBuffer> ringBufferFullHandler) {
         this.disruptor = new Disruptor<>(new SenderEventFactory(), ringbufferSize, DaemonThreadFactory.INSTANCE, ProducerType.MULTI, new BlockingWaitStrategy());
-        this.sender = new SynchronousSender(socketSupplier, addressLookup, errorHandler);
+        this.sender = SynchronousSender.builder()
+                .withSocketSupplier(socketSupplier)
+                .withAddressLookup(addressLookup)
+                .withErrorHandler(errorHandler)
+                .build();
         this.disruptor.handleEventsWith(new SenderEventHandler(sender));
         this.disruptor.start();
         this.ringBufferFullHandler = ringBufferFullHandler;

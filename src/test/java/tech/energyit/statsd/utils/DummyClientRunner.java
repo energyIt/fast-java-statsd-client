@@ -12,18 +12,19 @@ public class DummyClientRunner {
     private static final int STATSD_SERVER_PORT = 17254;
 
     public static void main(String[] args) {
-        try (SynchronousSender sender = new SynchronousSender("localhost", STATSD_SERVER_PORT, new StatsDClientErrorHandler() {
+        try (SynchronousSender sender = SynchronousSender.builder()
+                .withHostAndPort("localhost", STATSD_SERVER_PORT)
+                .withErrorHandler(new StatsDClientErrorHandler() {
+                    @Override
+                    public void handle(Exception exception) {
+                        exception.printStackTrace();
+                    }
 
-            @Override
-            public void handle(Exception exception) {
-                exception.printStackTrace();
-            }
-
-            @Override
-            public void handle(String errorFormat, Object... args) {
-                System.out.format(errorFormat + "\n", args);
-            }
-        })) {
+                    @Override
+                    public void handle(String errorFormat, Object... args) {
+                        System.out.format(errorFormat + "\n", args);
+                    }
+                }).build()) {
             FastStatsDClient client = new FastStatsDClient("my.prefix", sender);
 
 

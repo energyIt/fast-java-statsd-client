@@ -12,7 +12,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,8 +29,16 @@ public class SynchronousSenderTest {
 
     @Before
     public void setup() throws IOException {
-        sender = new SynchronousSender(() -> datagramChannel, () -> socketAddress, errorHandler);
+        sender = newSender();
         verify(datagramChannel).connect(same(socketAddress));
+    }
+
+    private SynchronousSender newSender() {
+        return SynchronousSender.builder()
+                .withSocketSupplier(() -> datagramChannel)
+                .withAddressLookup(() -> socketAddress)
+                .withErrorHandler(errorHandler)
+                .build();
     }
 
     @Test
@@ -66,7 +73,6 @@ public class SynchronousSenderTest {
     @Test(expected = IllegalStateException.class)
     public void ifConnectingToChannelThrowsErrorExcecptionMustBeThrown() throws IOException {
         when(datagramChannel.connect(same(socketAddress))).thenThrow(new IOException("some io error"));
-        new SynchronousSender(() -> datagramChannel, () -> socketAddress, errorHandler);
-
+        newSender();
     }
 }

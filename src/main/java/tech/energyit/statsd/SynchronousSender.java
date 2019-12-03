@@ -8,32 +8,23 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.function.Supplier;
 
+/**
+ * Writes a message to a {@link DatagramChannel}.
+ */
 public class SynchronousSender implements Sender, Closeable {
 
     private final DatagramChannel clientChannel;
 
     private final StatsDClientErrorHandler errorHandler;
 
-    public SynchronousSender(final String hostname, final int port) {
-        this(hostname, port, StatsDClientErrorHandler.NO_OP_HANDLER);
-    }
-
-    public SynchronousSender(final String hostname, final int port, final StatsDClientErrorHandler errorHandler) {
-        this(() -> new InetSocketAddress(IOUtils.inetAddress(hostname), port), errorHandler);
-    }
-
-    public SynchronousSender(final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
-        this(IOUtils::newDatagramChannel, addressLookup, errorHandler);
-    }
-
-    public SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+    private SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
         try {
             this.clientChannel = socketSupplier.get();
             this.clientChannel.setOption(StandardSocketOptions.SO_REUSEADDR, Boolean.TRUE);
             this.clientChannel.connect(addressLookup.get());
         } catch (final Exception e) {
-            throw new IllegalStateException("Failed to start StatsD client", e);
+            throw new IllegalStateException("Failed to connect channel", e);
         }
     }
 
@@ -43,7 +34,7 @@ public class SynchronousSender implements Sender, Closeable {
             final int sizeOfBuffer = msg.limit();
             final int sentBytes = clientChannel.write(msg);
             if (sizeOfBuffer != sentBytes) {
-                errorHandler.handle("Could not send entirely stat %s. Only sent %d bytes out of %d bytes",
+                errorHandler.handle("Could not send complete message : %s. %d/%d bytes sent.",
                         msg.toString(), sentBytes, sizeOfBuffer);
             }
         } catch (IOException e) {
@@ -67,5 +58,39 @@ public class SynchronousSender implements Sender, Closeable {
 
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Supplier<DatagramChannel> socketSupplier = IOUtils::newDatagramChannel;
+        private Supplier<InetSocketAddress> addressLookup = () -> new InetSocketAddress(IOUtils.inetAddress("localhost"), 8125);
+        private StatsDClientErrorHandler errorHandler = StatsDClientErrorHandler.NO_OP_HANDLER;
+
+        public Builder withHostAndPort(String hostname, int port) {
+            addressLookup = () -> new InetSocketAddress(IOUtils.inetAddress(hostname), port);
+            return this;
+        }
+
+        public Builder withSocketSupplier(Supplier<DatagramChannel> socketSupplier) {
+            this.socketSupplier = socketSupplier;
+            return this;
+        }
+
+        public Builder withAddressLookup(Supplier<InetSocketAddress> addressLookup) {
+            this.addressLookup = addressLookup;
+            return this;
+        }
+
+        public Builder withErrorHandler(StatsDClientErrorHandler errorHandler) {
+            this.errorHandler = errorHandler;
+            return this;
+        }
+
+        public SynchronousSender build() {
+            return new SynchronousSender(socketSupplier, addressLookup, errorHandler);
+        }
+    }
 
 }

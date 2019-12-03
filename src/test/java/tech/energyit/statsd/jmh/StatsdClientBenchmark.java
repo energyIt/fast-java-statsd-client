@@ -49,7 +49,9 @@ public class StatsdClientBenchmark {
 
     @Setup
     public void init() {
-        syncSender = new SynchronousSender(LOCALHOST, STATSD_SERVER_PORT);
+        syncSender = SynchronousSender.builder()
+                .withHostAndPort(LOCALHOST, STATSD_SERVER_PORT)
+                .build();
         asyncSender = AsynchronousSender.builder()
                 .withHostAndPort(LOCALHOST, STATSD_SERVER_PORT)
                 .withRingbufferSize(1024)
