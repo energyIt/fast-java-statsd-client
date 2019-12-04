@@ -17,11 +17,13 @@ public class SynchronousSender implements Sender, Closeable {
 
     private final StatsDClientErrorHandler errorHandler;
 
-    private SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup, final StatsDClientErrorHandler errorHandler) {
+    private SynchronousSender(final Supplier<DatagramChannel> socketSupplier, final Supplier<InetSocketAddress> addressLookup,
+                              final StatsDClientErrorHandler errorHandler, final boolean blockingChannel) {
         this.errorHandler = errorHandler;
         try {
             this.clientChannel = socketSupplier.get();
             this.clientChannel.setOption(StandardSocketOptions.SO_REUSEADDR, Boolean.TRUE);
+            this.clientChannel.configureBlocking(blockingChannel);
             this.clientChannel.connect(addressLookup.get());
         } catch (final Exception e) {
             throw new IllegalStateException("Failed to connect channel", e);
@@ -64,9 +66,15 @@ public class SynchronousSender implements Sender, Closeable {
 
     public static class Builder {
 
+        private boolean blockingChannel = false;
         private Supplier<DatagramChannel> socketSupplier = IOUtils::newDatagramChannel;
         private Supplier<InetSocketAddress> addressLookup = () -> new InetSocketAddress(IOUtils.inetAddress("localhost"), 8125);
         private StatsDClientErrorHandler errorHandler = StatsDClientErrorHandler.NO_OP_HANDLER;
+
+        public Builder blockingChannel(boolean blockingChannel) {
+            this.blockingChannel = blockingChannel;
+            return this;
+        }
 
         public Builder withHostAndPort(String hostname, int port) {
             addressLookup = () -> new InetSocketAddress(IOUtils.inetAddress(hostname), port);
@@ -89,7 +97,7 @@ public class SynchronousSender implements Sender, Closeable {
         }
 
         public SynchronousSender build() {
-            return new SynchronousSender(socketSupplier, addressLookup, errorHandler);
+            return new SynchronousSender(socketSupplier, addressLookup, errorHandler, blockingChannel);
         }
     }
 

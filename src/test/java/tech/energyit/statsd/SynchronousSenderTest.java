@@ -12,8 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SynchronousSenderTest {
@@ -35,6 +34,7 @@ public class SynchronousSenderTest {
 
     private SynchronousSender newSender() {
         return SynchronousSender.builder()
+                .blockingChannel(false)
                 .withSocketSupplier(() -> datagramChannel)
                 .withAddressLookup(() -> socketAddress)
                 .withErrorHandler(errorHandler)
@@ -48,6 +48,19 @@ public class SynchronousSenderTest {
         sender.send(msgAsBuffer);
 
         verify(datagramChannel).write(same(msgAsBuffer));
+    }
+
+    @Test
+    public void closeShouldCloseChannel() throws IOException {
+        sender.close();
+        verify(datagramChannel).close();
+    }
+
+    @Test
+    public void failingCloseMustInvokeErrorHandler() throws IOException {
+        doThrow(IOException.class).when(datagramChannel).close();
+        sender.close();
+        verify(errorHandler).handle(any(IOException.class));
     }
 
     @Test
