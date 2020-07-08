@@ -25,7 +25,7 @@ public class DummyClientRunner {
                         System.out.format(errorFormat + "\n", args);
                     }
                 }).build()) {
-            FastStatsDClient client = new FastStatsDClient("my.prefix", sender);
+            FastStatsDClient client = new FastStatsDClient("my.prefix", sender, false);
 
 
             final Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());

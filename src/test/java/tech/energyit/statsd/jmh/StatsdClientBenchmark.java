@@ -40,6 +40,7 @@ public class StatsdClientBenchmark {
 
     private SynchronousSender syncSender;
     private FastStatsDClient statsDClient;
+    private FastStatsDClient statsDClientWithExactDoubles;
     private AsynchronousSender asyncSender;
     private FastStatsDClient asyncStatsDClient;
     private AsynchronousSender asyncSenderWithFallback;
@@ -62,9 +63,10 @@ public class StatsdClientBenchmark {
                 .withRingbufferSize(1024)
                 .publishSynchronouslyWhenRingbufferIsFull()
                 .build();
-        statsDClient = new FastStatsDClient(PREFIX, syncSender);
-        asyncStatsDClient = new FastStatsDClient(PREFIX, asyncSender);
-        asyncStatsDClient2 = new FastStatsDClient(PREFIX, asyncSenderWithFallback);
+        statsDClient = new FastStatsDClient(PREFIX, syncSender, false);
+        statsDClientWithExactDoubles = new FastStatsDClient(PREFIX, syncSender, true);
+        asyncStatsDClient = new FastStatsDClient(PREFIX, asyncSender, false);
+        asyncStatsDClient2 = new FastStatsDClient(PREFIX, asyncSenderWithFallback, false);
         dataDogClient = new NonBlockingStatsDClient(PREFIX, LOCALHOST, STATSD_SERVER_PORT);
 
     }
@@ -80,6 +82,16 @@ public class StatsdClientBenchmark {
     @Benchmark
     public void countWithTwoTagsViaSyncFastClient(Blackhole bh) {
         statsDClient.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
+    }
+
+    @Benchmark
+    public void countWithTwoTagsViaSyncFastClientWithExactDoubles(Blackhole bh) {
+        statsDClientWithExactDoubles.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
+    }
+
+    @Benchmark
+    public void countWithTwoTagsViaSyncFastClientForDouble(Blackhole bh) {
+        statsDClient.count(METRIC_RAW, bh.d1, THE_TWO_TAGS);
     }
 
     @Benchmark

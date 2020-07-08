@@ -38,7 +38,7 @@ public class StatsdIntegrationTest {
                         System.out.format(errorFormat + "\n", args);
                     }
                 }).build();
-        client = new FastStatsDClient("my.prefix", sender);
+        client = new FastStatsDClient("my.prefix", sender, false);
         server = new DummyStatsDServer(STATSD_SERVER_PORT);
     }
 

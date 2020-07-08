@@ -22,7 +22,7 @@ public class FastStatsDClientTest {
     @Before
     public void setUp() {
         sender = new LoggingSender();
-        statsDClient = new FastStatsDClient("my.prefix", sender);
+        statsDClient = new FastStatsDClient("my.prefix", sender, false);
     }
 
     @After
@@ -184,7 +184,7 @@ public class FastStatsDClientTest {
 
     @Test
     public void emptyPrefixShouldBeSendCorrectly() {
-        statsDClient = new FastStatsDClient("", sender);
+        statsDClient = new FastStatsDClient("", sender, false);
         statsDClient.count("my.metric".getBytes(), 10);
         assertThat(sender.getMessages()).containsExactly("my.metric:10|c");
     }
@@ -296,6 +296,35 @@ public class FastStatsDClientTest {
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.45678|s");
     }
 
+    @Test
+    public void doublesAreRoundedTo9DigitFraction() {
+        statsDClient.set("my.metric".getBytes(), -10.123456789012);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.123456789|s");
+    }
+
+    @Test
+    public void doublesWithNoFractionArePassedCorrectly() {
+        statsDClient.set("my.metric".getBytes(), 10.0);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.0|s");
+    }
+
+    @Test
+    public void negativeDoublesWithNoFractionArePassedCorrectly() {
+        statsDClient.set("my.metric".getBytes(), -10.0);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.0|s");
+    }
+
+    @Test
+    public void scientificLiteralsAreConvertedCorrectly() {
+        statsDClient.set("my.metric".getBytes(), 1e3);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:1000.0|s");
+    }
+
+    @Test
+    public void scientificLiteralsWithNegativeExponentsAreConvertedCorrectly() {
+        statsDClient.set("my.metric".getBytes(), 2e-3);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:0.002|s");
+    }
 
     @Test
     public void doubleSetWithRateShouldBeSendCorrectly() {

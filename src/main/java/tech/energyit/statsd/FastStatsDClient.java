@@ -24,18 +24,20 @@ public final class FastStatsDClient implements StatsDClient {
 
     private final byte[] prefix;
     private final Sender sender;
+    private final boolean exactDoubles;
 
     public FastStatsDClient(Sender sender) {
-        this(null, sender);
+        this(null, sender, false);
     }
 
-    public FastStatsDClient(final String prefix, final Sender sender) {
+    public FastStatsDClient(final String prefix, final Sender sender, boolean exactDoubles) {
         if ((prefix != null) && (!prefix.isEmpty())) {
             this.prefix = (prefix + '.').getBytes(MESSAGE_CHARSET);
         } else {
             this.prefix = new byte[0];
         }
         this.sender = sender;
+        this.exactDoubles = exactDoubles;
     }
 
 
@@ -202,7 +204,7 @@ public final class FastStatsDClient implements StatsDClient {
             try {
                 buffer.clear();
                 putPrefix(metricName, buffer);
-                putDouble(buffer, value);
+                putDouble(buffer, value, exactDoubles);
                 putSuffix(buffer, metricType, sampleRate, tags);
                 buffer.flip();
                 formatted = true;
@@ -227,7 +229,7 @@ public final class FastStatsDClient implements StatsDClient {
         if (sampleRate != NO_SAMPLE_RATE) {
             buffer.put((byte) '|');
             buffer.put((byte) '@');
-            putDouble(buffer, sampleRate);
+            putDouble(buffer, sampleRate, exactDoubles);
         }
         if (tags != null && tags.length > 0) {
             buffer.put((byte) '|');
@@ -261,8 +263,8 @@ public final class FastStatsDClient implements StatsDClient {
         Numbers.putLongAsAsciiBytes(v, bb);
     }
 
-    private static void putDouble(ByteBuffer bb, double v) {
-        bb.put(String.valueOf(v).getBytes(MESSAGE_CHARSET));
+    private static void putDouble(ByteBuffer bb, double v, boolean exactDoubles) {
+        Numbers.putDoubleAsAsciiBytes(v, bb, MESSAGE_CHARSET, exactDoubles);
     }
 
     private static boolean isInvalidSample(double sampleRate) {

@@ -1,6 +1,7 @@
 package tech.energyit.statsd;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * utilities to work with numbers.
@@ -8,6 +9,8 @@ import java.nio.ByteBuffer;
  * @author Milos Gregor
  */
 final class Numbers {
+
+    private static final int ROUNDING_MULTIPLIER = 1000000000;
 
     private Numbers() { /* never to be called */}
 
@@ -59,7 +62,7 @@ final class Numbers {
     /**
      * Inspired by protected method Long.getChars().
      *
-     * @param i - long to put to buffer
+     * @param i   - long to put to buffer
      * @param buf - buffer to be written to
      */
     static void putLongAsAsciiBytes(long i, ByteBuffer buf) {
@@ -112,4 +115,42 @@ final class Numbers {
             buf.put(--charPos, (byte) sign);
         }
     }
+
+    /**
+     * @param v              double to be put to the buffer encoded as ascii bytes
+     * @param bb             buffer to put to
+     * @param messageCharset - charset to be used for exact encoding
+     * @param exact          if exact is false, it is much faster and doubles are rounded only up to 9 decimal places
+     */
+    public static void putDoubleAsAsciiBytes(double v, ByteBuffer bb, Charset messageCharset, boolean exact) {
+        if (exact || v >= Long.MAX_VALUE || v <= Long.MIN_VALUE) {
+            bb.put(String.valueOf(v).getBytes(messageCharset));
+        } else {
+            long digits = (long) v;
+            if (digits == 0L && v < 0) {
+                bb.put((byte) '-');
+            }
+            putLongAsAsciiBytes(digits, bb);
+            bb.put((byte) '.');
+            long fraction = Math.round(Math.abs(v - digits) * ROUNDING_MULTIPLIER);
+            if (fraction > 0) {
+                // put x zeros before fraction digits:
+                long shift = 10;
+                while (fraction * shift < ROUNDING_MULTIPLIER) {
+                    shift *= 10;
+                    bb.put((byte) '0');
+                }
+                // avoid zeros at the end of fraction:
+                long divisor = 10;
+                while (fraction % divisor == 0) {
+                    divisor *= 10;
+                }
+                putLongAsAsciiBytes(fraction / (divisor / 10), bb);
+            } else {
+                putLongAsAsciiBytes(0L, bb);
+            }
+        }
+
+    }
+
 }
