@@ -27,7 +27,11 @@ public final class FastStatsDClient implements StatsDClient {
     private final boolean exactDoubles;
 
     public FastStatsDClient(Sender sender) {
-        this(null, sender, false);
+        this(null, sender);
+    }
+
+    public FastStatsDClient(final String prefix, final Sender sender) {
+        this(prefix, sender, false);
     }
 
     public FastStatsDClient(final String prefix, final Sender sender, boolean exactDoubles) {
@@ -165,12 +169,23 @@ public final class FastStatsDClient implements StatsDClient {
         send(aspect, value, MetricType.SET, sampleRate, tags);
     }
 
+    @Override
+    public void meter(byte[] aspect, long value, Tag... tags) {
+        send(aspect, value, MetricType.METER, NO_SAMPLE_RATE, tags);
+    }
+
+    @Override
+    public void meter(byte[] aspect, double value, Tag... tags) {
+        send(aspect, value, MetricType.METER, NO_SAMPLE_RATE, tags);
+    }
+
     public void clear() {
         MSG_BUFFER.remove();
     }
 
     /**
      * format and send with long value.
+     *
      * @throws IllegalArgumentException if the message is too large
      */
     private void send(byte[] metricName, long value, MetricType metricType, double sampleRate, Tag[] tags) {
@@ -276,7 +291,7 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
     enum MetricType {
-        GAUGE("g"), TIMER("ms"), COUNTER("c"), HISTOGRAM("h"), SET("s");
+        GAUGE("g"), TIMER("ms"), COUNTER("c"), HISTOGRAM("h"), SET("s"), METER("m");
 
         MetricType(String key) {
             this.key = key.getBytes(MESSAGE_CHARSET);

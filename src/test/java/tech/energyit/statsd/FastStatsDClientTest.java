@@ -213,10 +213,7 @@ public class FastStatsDClientTest {
                 statsDClient.time("my.metric".getBytes(), value);
                 assertThat(sender.getMessages()).contains("my.prefix.my.metric:" + value + "|ms");
             });
-
         }
-
-
     }
 
 
@@ -270,6 +267,21 @@ public class FastStatsDClientTest {
         Tag tag2 = new TagImpl("tag2".getBytes(), "val2".getBytes());
         statsDClient.histogram("my.metric".getBytes(), 10.4567, tag1, tag2);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10.4567|h|#" + tag1 + ',' + tag2);
+    }
+
+    @Test
+    public void meterWithOneTagShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        statsDClient.meter("my.meter".getBytes(), 1234567890123456L, tag1);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.meter:1234567890123456|m|#" + tag1);
+    }
+
+    @Test
+    public void meterWithTwoTagsShouldBeSendCorrectly() {
+        Tag tag1 = new TagImpl("tag1".getBytes(), "val1".getBytes());
+        Tag tag2 = new TagImpl("tag2".getBytes(), "val2".getBytes());
+        statsDClient.meter("my.meter".getBytes(), 10.4567, tag1, tag2);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.meter:10.4567|m|#" + tag1 + ',' + tag2);
     }
 
     @Test

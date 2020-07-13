@@ -197,4 +197,22 @@ public interface StatsDClient {
      * @param tags       array of tags to be added to the data
      */
     void set(byte[] aspect, double value, double sampleRate, Tag... tags);
+
+    /**
+     * Records a value for the specified named meter.
+     *
+     * @param aspect the name of the meter
+     * @param value  the value to be incorporated in the meter
+     * @param tags   array of tags to be added to the data
+     */
+    void meter(byte[] aspect, long value, Tag... tags);
+
+    /**
+     * Records a value for the specified named meter.
+     *
+     * @param aspect the name of the meter
+     * @param value  the value to be incorporated in the meter
+     * @param tags   array of tags to be added to the data
+     */
+    void meter(byte[] aspect, double value, Tag... tags);
 }
