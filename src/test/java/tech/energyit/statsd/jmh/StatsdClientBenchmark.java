@@ -80,32 +80,32 @@ public class StatsdClientBenchmark {
     }
 
     @Benchmark
-    public void countWithTwoTagsViaSyncFastClient(Blackhole bh) {
+    public void countLongsViaSyncFastClient(Blackhole bh) {
         statsDClient.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
     }
 
     @Benchmark
-    public void countWithTwoTagsViaSyncFastClientWithExactDoubles(Blackhole bh) {
-        statsDClientWithExactDoubles.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
+    public void countDoublesViaSyncFastClientUsingExactDoubles(Blackhole bh) {
+        statsDClientWithExactDoubles.count(METRIC_RAW, bh.d1, THE_TWO_TAGS);
     }
 
     @Benchmark
-    public void countWithTwoTagsViaSyncFastClientForDouble(Blackhole bh) {
+    public void countDoublesViaSyncFastClient(Blackhole bh) {
         statsDClient.count(METRIC_RAW, bh.d1, THE_TWO_TAGS);
     }
 
     @Benchmark
-    public void countWithTwoTagsViaAsyncFastClient(Blackhole bh) {
+    public void countLongsViaAsyncFastClient(Blackhole bh) {
         asyncStatsDClient.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
     }
 
     @Benchmark
-    public void countWithTwoTagsViaAsyncFastClient2(Blackhole bh) {
+    public void countLongsViaAsyncFastClientWithFallbackToSyncSender(Blackhole bh) {
         asyncStatsDClient2.count(METRIC_RAW, bh.i1, THE_TWO_TAGS);
     }
 
     @Benchmark
-    public void countWithTwoTagsViaDatadogClient(Blackhole bh) {
+    public void countLongsViaDatadogClient(Blackhole bh) {
         dataDogClient.count(METRIC, bh.i1, TAG1_STRING, TAG2_STRING);
     }
 
