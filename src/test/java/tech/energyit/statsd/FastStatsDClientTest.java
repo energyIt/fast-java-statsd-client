@@ -100,6 +100,12 @@ public class FastStatsDClientTest {
     }
 
     @Test
+    public void longGaugeWithDeltaSignShouldBeSendCorrectly() {
+        statsDClient.gauge("my.metric".getBytes(), '+', 10);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:+10|g");
+    }
+
+    @Test
     public void gaugeWithRateShouldBeSendCorrectly() {
         statsDClient.gauge("my.metric".getBytes(), 10, 0.1);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:10|g|@0.1");
@@ -115,6 +121,12 @@ public class FastStatsDClientTest {
     public void doubleGaugeShouldBeSendCorrectly() {
         statsDClient.gauge("my.metric".getBytes(), -10.45678);
         assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:-10.45678|g");
+    }
+
+    @Test
+    public void doubleWithSignGaugeShouldBeSendCorrectly() {
+        statsDClient.gauge("my.metric".getBytes(), '+', 10.45678);
+        assertThat(sender.getMessages()).containsExactly("my.prefix.my.metric:+10.45678|g");
     }
 
     @Test
