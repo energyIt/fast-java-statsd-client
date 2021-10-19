@@ -81,6 +81,11 @@ public final class FastStatsDClient implements StatsDClient {
 
 
     @Override
+    public void gauge(final byte[] aspect, final char deltaSign, final long value, final Tag... tags) {
+        send(aspect, deltaSign, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
+    }
+
+    @Override
     public void gauge(byte[] aspect, long value, double sampleRate, Tag... tags) {
         if (isInvalidSample(sampleRate)) {
             return;
@@ -94,6 +99,10 @@ public final class FastStatsDClient implements StatsDClient {
         send(aspect, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
     }
 
+    @Override
+    public void gauge(final byte[] aspect, final char deltaSign, final double value, final Tag... tags) {
+        send(aspect, deltaSign, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
+    }
 
     @Override
     public void gauge(byte[] aspect, double value, double sampleRate, Tag... tags) {
@@ -209,6 +218,32 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
     /**
+     * format and send with long value with delta sign prepended before the value
+     *
+     * @throws IllegalArgumentException if the message is too large
+     */
+    private void send(byte[] metricName, char deltaSign, long value, MetricType metricType, double sampleRate, Tag[] tags) {
+        ByteBuffer buffer = MSG_BUFFER.get();
+        boolean formatted = false;
+        while (!formatted) {
+            try {
+                buffer.clear();
+                putPrefix(metricName, buffer);
+                buffer.put((byte) deltaSign);
+                putLong(buffer, value);
+                putSuffix(buffer, metricType, sampleRate, tags);
+                buffer.flip();
+                formatted = true;
+            } catch (BufferOverflowException e) {
+                // bigger messages are exceptional so using Exceptions should be good enough
+                buffer = createByteBuffer(newCapacity(buffer.capacity()));
+                MSG_BUFFER.set(buffer);
+            }
+        }
+        sender.send(buffer);
+    }
+
+    /**
      * format and send with double value.
      * @throws IllegalArgumentException if the message is too large
      */
@@ -231,6 +266,33 @@ public final class FastStatsDClient implements StatsDClient {
         }
         sender.send(buffer);
     }
+
+    /**
+     * format and send with double value with delta sign prepended before the value
+     *
+     * @throws IllegalArgumentException if the message is too large
+     */
+    private void send(byte[] metricName, char deltaSign, double value, MetricType metricType, double sampleRate, Tag[] tags) {
+        ByteBuffer buffer = MSG_BUFFER.get();
+        boolean formatted = false;
+        while (!formatted) {
+            try {
+                buffer.clear();
+                putPrefix(metricName, buffer);
+                buffer.put((byte) deltaSign);
+                putDouble(buffer, value, exactDoubles);
+                putSuffix(buffer, metricType, sampleRate, tags);
+                buffer.flip();
+                formatted = true;
+            } catch (BufferOverflowException e) {
+                // bigger messages are exceptional so using Exceptions should be good enough
+                buffer = createByteBuffer(newCapacity(buffer.capacity()));
+                MSG_BUFFER.set(buffer);
+            }
+        }
+        sender.send(buffer);
+    }
+
 
     private void putPrefix(byte[] metricName, ByteBuffer buffer) {
         buffer.put(prefix);

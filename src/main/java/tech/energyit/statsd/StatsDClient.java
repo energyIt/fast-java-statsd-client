@@ -21,6 +21,18 @@ public interface StatsDClient {
     void gauge(byte[] aspect, long value, Tag... tags);
 
     /**
+     * Records the delta value for the specified named gauge.
+     *
+     * @param aspect
+     *     the name of the gauge
+     * @param deltaSign
+     *     either '+' or '-' to indicate either increase or decrease gauge value
+     * @param value
+     *     the (positive!) change of value
+     */
+    void gauge(byte[] aspect, char deltaSign, long value, Tag... tags);
+
+    /**
      * Records the latest fixed value for the specified named gauge.
      *
      * @param aspect     the name of the gauge
@@ -37,6 +49,18 @@ public interface StatsDClient {
      * @param value  the new reading of the gauge
      */
     void gauge(byte[] aspect, double value, Tag... tags);
+
+    /**
+     * Records the delta value for the specified named gauge.
+     *
+     * @param aspect
+     *     the name of the gauge
+     * @param deltaSign
+     *     either '+' or '-' to indicate either increase or decrease gauge value
+     * @param value
+     *     the (positive!) change of value
+     */
+    void gauge(byte[] aspect, char deltaSign, double value, Tag... tags);
 
     /**
      * Records the latest fixed value for the specified named gauge.
