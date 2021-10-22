@@ -19,6 +19,7 @@ public final class FastStatsDClient implements StatsDClient {
     public static final int MAX_BUFFER_LENGTH = 1024 * 1024;
 
     static final double NO_SAMPLE_RATE = 1.0;
+    static final char NO_DELTA_SIGN = ' ';
 
     private static final ThreadLocal<ByteBuffer> MSG_BUFFER = ThreadLocal.withInitial(() -> createByteBuffer(INITIAL_BUFFER_SIZE));
 
@@ -47,7 +48,7 @@ public final class FastStatsDClient implements StatsDClient {
 
     @Override
     public void count(final byte[] aspect, final long delta, final Tag... tags) {
-        send(aspect, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
     }
 
 
@@ -56,13 +57,13 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, delta, MetricType.COUNTER, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, delta, MetricType.COUNTER, sampleRate, tags);
     }
 
 
     @Override
     public void count(final byte[] aspect, final double delta, final Tag... tags) {
-        send(aspect, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, delta, MetricType.COUNTER, NO_SAMPLE_RATE, tags);
     }
 
 
@@ -71,12 +72,12 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, delta, MetricType.COUNTER, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, delta, MetricType.COUNTER, sampleRate, tags);
     }
 
     @Override
     public void gauge(final byte[] aspect, final long value, final Tag... tags) {
-        send(aspect, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
     }
 
 
@@ -90,13 +91,13 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, value, MetricType.GAUGE, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.GAUGE, sampleRate, tags);
     }
 
 
     @Override
     public void gauge(byte[] aspect, double value, Tag... tags) {
-        send(aspect, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.GAUGE, NO_SAMPLE_RATE, tags);
     }
 
     @Override
@@ -109,13 +110,13 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, value, MetricType.GAUGE, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.GAUGE, sampleRate, tags);
     }
 
 
     @Override
     public void time(final byte[] aspect, final long timeInMs, final Tag... tags) {
-        send(aspect, timeInMs, MetricType.TIMER, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, timeInMs, MetricType.TIMER, NO_SAMPLE_RATE, tags);
     }
 
     @Override
@@ -123,12 +124,12 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, timeInMs, MetricType.TIMER, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, timeInMs, MetricType.TIMER, sampleRate, tags);
     }
 
     @Override
     public void histogram(byte[] aspect, long value, Tag... tags) {
-        send(aspect, value, MetricType.HISTOGRAM, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.HISTOGRAM, NO_SAMPLE_RATE, tags);
     }
 
     @Override
@@ -136,12 +137,12 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, value, MetricType.HISTOGRAM, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.HISTOGRAM, sampleRate, tags);
     }
 
     @Override
     public void histogram(byte[] aspect, double value, Tag... tags) {
-        send(aspect, value, MetricType.HISTOGRAM, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.HISTOGRAM, NO_SAMPLE_RATE, tags);
     }
 
     @Override
@@ -149,12 +150,12 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, value, MetricType.HISTOGRAM, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.HISTOGRAM, sampleRate, tags);
     }
 
     @Override
     public void set(byte[] aspect, long value, Tag... tags) {
-        send(aspect, value, MetricType.SET, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.SET, NO_SAMPLE_RATE, tags);
     }
 
     @Override
@@ -162,12 +163,12 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, value, MetricType.SET, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.SET, sampleRate, tags);
     }
 
     @Override
     public void set(byte[] aspect, double value, Tag... tags) {
-        send(aspect, value, MetricType.SET, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.SET, NO_SAMPLE_RATE, tags);
     }
 
     @Override
@@ -175,17 +176,17 @@ public final class FastStatsDClient implements StatsDClient {
         if (isInvalidSample(sampleRate)) {
             return;
         }
-        send(aspect, value, MetricType.SET, sampleRate, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.SET, sampleRate, tags);
     }
 
     @Override
     public void meter(byte[] aspect, long value, Tag... tags) {
-        send(aspect, value, MetricType.METER, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.METER, NO_SAMPLE_RATE, tags);
     }
 
     @Override
     public void meter(byte[] aspect, double value, Tag... tags) {
-        send(aspect, value, MetricType.METER, NO_SAMPLE_RATE, tags);
+        send(aspect, NO_DELTA_SIGN, value, MetricType.METER, NO_SAMPLE_RATE, tags);
     }
 
     public void clear() {
@@ -197,39 +198,13 @@ public final class FastStatsDClient implements StatsDClient {
      *
      * @throws IllegalArgumentException if the message is too large
      */
-    private void send(byte[] metricName, long value, MetricType metricType, double sampleRate, Tag[] tags) {
-        ByteBuffer buffer = MSG_BUFFER.get();
-        boolean formatted = false;
-        while (!formatted) {
-            try {
-                buffer.clear();
-                putPrefix(metricName, buffer);
-                putLong(buffer, value);
-                putSuffix(buffer, metricType, sampleRate, tags);
-                buffer.flip();
-                formatted = true;
-            } catch (BufferOverflowException e) {
-                // bigger messages are exceptional so using Exceptions should be good enough
-                buffer = createByteBuffer(newCapacity(buffer.capacity()));
-                MSG_BUFFER.set(buffer);
-            }
-        }
-        sender.send(buffer);
-    }
-
-    /**
-     * format and send with long value with delta sign prepended before the value
-     *
-     * @throws IllegalArgumentException if the message is too large
-     */
     private void send(byte[] metricName, char deltaSign, long value, MetricType metricType, double sampleRate, Tag[] tags) {
         ByteBuffer buffer = MSG_BUFFER.get();
         boolean formatted = false;
         while (!formatted) {
             try {
                 buffer.clear();
-                putPrefix(metricName, buffer);
-                buffer.put((byte) deltaSign);
+                putPrefix(metricName, buffer, deltaSign);
                 putLong(buffer, value);
                 putSuffix(buffer, metricType, sampleRate, tags);
                 buffer.flip();
@@ -247,39 +222,13 @@ public final class FastStatsDClient implements StatsDClient {
      * format and send with double value.
      * @throws IllegalArgumentException if the message is too large
      */
-    private void send(byte[] metricName, double value, MetricType metricType, double sampleRate, Tag[] tags) {
-        ByteBuffer buffer = MSG_BUFFER.get();
-        boolean formatted = false;
-        while (!formatted) {
-            try {
-                buffer.clear();
-                putPrefix(metricName, buffer);
-                putDouble(buffer, value, exactDoubles);
-                putSuffix(buffer, metricType, sampleRate, tags);
-                buffer.flip();
-                formatted = true;
-            } catch (BufferOverflowException e) {
-                // bigger messages are exceptional so using Exceptions should be good enough
-                buffer = createByteBuffer(newCapacity(buffer.capacity()));
-                MSG_BUFFER.set(buffer);
-            }
-        }
-        sender.send(buffer);
-    }
-
-    /**
-     * format and send with double value with delta sign prepended before the value
-     *
-     * @throws IllegalArgumentException if the message is too large
-     */
     private void send(byte[] metricName, char deltaSign, double value, MetricType metricType, double sampleRate, Tag[] tags) {
         ByteBuffer buffer = MSG_BUFFER.get();
         boolean formatted = false;
         while (!formatted) {
             try {
                 buffer.clear();
-                putPrefix(metricName, buffer);
-                buffer.put((byte) deltaSign);
+                putPrefix(metricName, buffer, deltaSign);
                 putDouble(buffer, value, exactDoubles);
                 putSuffix(buffer, metricType, sampleRate, tags);
                 buffer.flip();
@@ -294,10 +243,13 @@ public final class FastStatsDClient implements StatsDClient {
     }
 
 
-    private void putPrefix(byte[] metricName, ByteBuffer buffer) {
+    private void putPrefix(byte[] metricName, ByteBuffer buffer, char deltaSign) {
         buffer.put(prefix);
         buffer.put(metricName);
         buffer.put((byte) ':');
+        if (deltaSign != NO_DELTA_SIGN) {
+            buffer.put((byte) deltaSign);
+        }
     }
 
     private void putSuffix(ByteBuffer buffer, MetricType metricType, double sampleRate, Tag[] tags) {
