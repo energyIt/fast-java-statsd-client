@@ -19,6 +19,7 @@ class SenderEvent {
             eventBuffer.clear();
         }
         eventBuffer.put(msg);
+        eventBuffer.flip();
     }
 
     ByteBuffer getMsg() {

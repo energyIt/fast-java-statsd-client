@@ -63,7 +63,7 @@ public class AsynchronousSenderTest {
         ArgumentCaptor<ByteBuffer> sentMsg = ArgumentCaptor.forClass(ByteBuffer.class);
         verify(datagramChannel).write(sentMsg.capture());
         byte[] sentMessage = new byte[stringMessage.length()];
-        ((ByteBuffer) sentMsg.getValue().flip()).get(sentMessage);
+        ((ByteBuffer) sentMsg.getValue()).get(sentMessage);
 
         Assertions.assertThat(new String(sentMessage)).isEqualTo(stringMessage);
     }
@@ -100,7 +100,7 @@ public class AsynchronousSenderTest {
         ArgumentCaptor<ByteBuffer> sentMsg = ArgumentCaptor.forClass(ByteBuffer.class);
         verify(datagramChannel).write(sentMsg.capture());
         byte[] sentMessage = new byte[msg.length];
-        ((ByteBuffer) sentMsg.getValue().flip()).get(sentMessage);
+        ((ByteBuffer) sentMsg.getValue()).get(sentMessage);
 
         Assertions.assertThat(sentMessage).isEqualTo(msg);
     }
